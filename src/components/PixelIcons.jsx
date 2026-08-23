@@ -212,22 +212,36 @@ export const PixelRadarWidget = ({ onGlobalClick, onCenterClick, isGlobal = fals
     </svg>
 
     <div className="absolute right-1 top-2 flex flex-col gap-1.5 z-20">
+      {/* Global Map Button */}
       <button
         onClick={onGlobalClick}
-        title="Zoom to Global View"
-        className={`w-6 h-6 rounded-full border border-black flex items-center justify-center text-[10px] font-bold shadow-md transition-all ${
+        title="Global Map View"
+        className={`w-6 h-6 rounded-full border border-black flex items-center justify-center shadow-md transition-all cursor-pointer ${
           isGlobal ? 'bg-[#7bb0d4] text-black' : 'bg-[#1b2b3a] text-cyan-300 hover:bg-[#2c445c]'
         }`}
       >
-        🌐
+        <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="12" cy="12" r="9" />
+          <line x1="3.6" y1="9" x2="20.4" y2="9" />
+          <line x1="3.6" y1="15" x2="20.4" y2="15" />
+          <ellipse cx="12" cy="12" rx="4" ry="9" />
+        </svg>
       </button>
 
+      {/* Center Map Target Bullseye Button (Matching Reference Screenshot) */}
       <button
         onClick={onCenterClick}
-        title="Center to VIT Vellore / India Hub"
-        className="w-6 h-6 rounded-full border border-black bg-[#1b2b3a] text-cyan-300 hover:bg-[#2c445c] flex items-center justify-center text-[10px] font-bold shadow-md transition-all"
+        title="Center Map on Neighborhood / VIT Vellore"
+        className="w-6 h-6 rounded-full border border-black bg-[#1b2b3a] hover:bg-[#2c445c] text-cyan-300 flex items-center justify-center shadow-md transition-all cursor-pointer"
       >
-        🎯
+        <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="12" cy="12" r="8" />
+          <circle cx="12" cy="12" r="3" fill="currentColor" />
+          <line x1="12" y1="2" x2="12" y2="6" />
+          <line x1="12" y1="18" x2="12" y2="22" />
+          <line x1="2" y1="12" x2="6" y2="12" />
+          <line x1="18" y1="12" x2="22" y2="12" />
+        </svg>
       </button>
     </div>
   </div>

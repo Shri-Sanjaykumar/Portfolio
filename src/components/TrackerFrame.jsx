@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { profile } from '../data/portfolioData';
 import { PixelSpiderMask, PixelMascot, PixelSpeaker, PixelSpiderMarker } from './PixelIcons';
 import MapViewport from './MapViewport';
@@ -13,12 +13,10 @@ import ProjectDossierModal from './ProjectDossierModal';
 import HelpOverlay from './HelpOverlay';
 import SkillsArchitectureOverlay from './SkillsArchitectureOverlay';
 import LeadershipEducationOverlay from './LeadershipEducationOverlay';
-import SpideyGameModal from './game/SpideyGameModal';
-import { useGame } from '../context/GameContext';
-import { setSoundEnabled, getSoundEnabled, soundEffects } from '../utils/audio';
+import ThreeSignalArena from './ThreeSignalArena';
+import { setSoundEnabled, soundEffects } from '../utils/audio';
 
 export default function TrackerFrame() {
-  const { gameState, recentUnlock } = useGame();
   const [showIntro, setShowIntro] = useState(() => {
     try {
       return !localStorage.getItem('hasSeenSanjayIntro_v1');
@@ -30,7 +28,7 @@ export default function TrackerFrame() {
   const [isSoundOn, setIsSoundOn] = useState(false);
   const [confirmedActive, setConfirmedActive] = useState(true);
   const [rumoredActive, setRumoredActive] = useState(true);
-  const [activeOverlay, setActiveOverlay] = useState(null); // 'nav' | 'activity' | 'watch' | 'connect' | 'skills' | 'leadership' | 'education' | 'help' | 'game'
+  const [activeOverlay, setActiveOverlay] = useState(null); // 'nav' | 'activity' | 'watch' | 'connect' | 'skills' | 'leadership' | 'education' | 'help' | '3d_arena'
   const [selectedDossierNode, setSelectedDossierNode] = useState(null);
   const [statusToast, setStatusToast] = useState(null);
 
@@ -84,8 +82,8 @@ export default function TrackerFrame() {
   const handleSelectView = (viewId) => {
     if (viewId === 'tracker') {
       setActiveOverlay(null);
-    } else if (viewId === 'game') {
-      setActiveOverlay('game');
+    } else if (viewId === '3d_arena') {
+      setActiveOverlay('3d_arena');
     } else if (viewId === 'activity' || viewId === 'projects' || viewId === 'experience') {
       setActiveOverlay('activity');
     } else if (viewId === 'watch') {
@@ -114,34 +112,16 @@ export default function TrackerFrame() {
         <CinematicIntro onComplete={handleIntroComplete} />
       )}
 
-      {/* Achievement Unlock Popup */}
-      {recentUnlock && (
-        <div className="fixed top-4 right-4 z-50 bg-[#102030] border-3 border-yellow-400 rounded-xl p-3 shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
-          <span className="text-3xl">{recentUnlock.icon}</span>
-          <div>
-            <div className="text-[10px] font-pixel text-yellow-400">
-              TROPHY UNLOCKED!
-            </div>
-            <div className="text-xs font-silk font-bold text-white">
-              {recentUnlock.title}
-            </div>
-            <div className="text-[10px] font-mono text-gray-300">
-              +{recentUnlock.xpReward} XP
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* ========================================================
           SLATE-BLUE RETRO MONITOR FRAME (Expanded Full Viewport)
           ======================================================== */}
       <div className="relative w-full max-w-[1540px] mx-auto flex-1 min-h-0 bg-[#5695bc] rounded-2xl md:rounded-3xl border-4 md:border-[6px] border-black p-2.5 sm:p-3.5 md:p-4 shadow-[0_20px_50px_rgba(0,0,0,0.8),inset_2px_2px_0_rgba(255,255,255,0.4),inset_-2px_-2px_0_rgba(0,0,0,0.4)] flex flex-col justify-between">
         
-        {/* Hanging Upside-Down Spider-Man on Web String */}
+        {/* Hanging Upside-Down Spider-Man on Web String (Larger & Prominent) */}
         <HangingSpiderman
           onClick={() => {
             triggerToast('🕸️ SPIDER-SENSE TINGLING!');
-            setActiveOverlay('game');
+            setActiveOverlay('3d_arena');
           }}
         />
 
@@ -152,13 +132,13 @@ export default function TrackerFrame() {
             setActiveOverlay(activeOverlay === 'nav' ? null : 'nav');
           }}
           aria-label="Toggle navigation menu"
-          className="absolute top-2 sm:top-2.5 left-2.5 sm:left-3.5 z-40 w-10 h-10 sm:w-11 sm:h-11 rounded-full border-3 sm:border-4 border-[#e8a838] bg-[#1a2634] hover:bg-[#25374a] flex items-center justify-center shadow-[0_4px_0_#000] transition-transform active:scale-95 cursor-pointer group"
+          className="absolute top-2 sm:top-2.5 left-2.5 sm:left-3.5 z-40 w-10 h-10 sm:w-12 sm:h-12 rounded-full border-3 sm:border-4 border-[#e8a838] bg-[#1a2634] hover:bg-[#25374a] flex items-center justify-center shadow-[0_4px_0_#000] transition-transform active:scale-95 cursor-pointer group"
           title="Open Navigation Menu"
         >
           {/* Spidey Eye Mask Eyes matching Screenshot media_1787520704200.png */}
-          <div className="flex items-center gap-1 group-hover:scale-110 transition-transform">
-            <div className="w-2.5 h-3.5 bg-white rounded-t-sm rounded-bl-lg border border-black transform rotate-[-12deg] shadow-[0_0_4px_white]" />
-            <div className="w-2.5 h-3.5 bg-white rounded-t-sm rounded-br-lg border border-black transform rotate-[12deg] shadow-[0_0_4px_white]" />
+          <div className="flex items-center gap-1.5 group-hover:scale-110 transition-transform">
+            <div className="w-2.5 h-4 bg-white rounded-t-sm rounded-bl-lg border border-black transform rotate-[-14deg] shadow-[0_0_6px_white]" />
+            <div className="w-2.5 h-4 bg-white rounded-t-sm rounded-br-lg border border-black transform rotate-[14deg] shadow-[0_0_6px_white]" />
           </div>
         </button>
 
@@ -180,11 +160,11 @@ export default function TrackerFrame() {
             setActiveOverlay(activeOverlay === 'connect' ? null : 'connect');
           }}
           aria-label="Open Message Center"
-          className="absolute top-2 sm:top-2.5 right-2.5 sm:right-3.5 z-40 w-10 h-10 sm:w-11 sm:h-11 rounded-lg border-2 sm:border-3 border-black bg-white hover:bg-gray-100 flex items-center justify-center shadow-[0_4px_0_#000] transition-transform active:scale-95 cursor-pointer group"
+          className="absolute top-2 sm:top-2.5 right-2.5 sm:right-3.5 z-40 w-10 h-10 sm:w-12 sm:h-12 rounded-lg border-2 sm:border-3 border-black bg-white hover:bg-gray-100 flex items-center justify-center shadow-[0_4px_0_#000] transition-transform active:scale-95 cursor-pointer group"
           title="Open Message & Transmission Center"
         >
           <div className="transform group-hover:scale-110 transition-transform">
-            <PixelSpiderMarker color="white" size={22} />
+            <PixelSpiderMarker color="white" size={24} />
           </div>
         </button>
 
@@ -200,7 +180,7 @@ export default function TrackerFrame() {
                 : 'bg-[#3b5236] opacity-60 translate-x-[-3px]'
             }`}
           >
-            <PixelSpiderMarker color="green" size={20} />
+            <PixelSpiderMarker color="green" size={22} />
           </button>
 
           {/* Rumored Sighting Filter Tab */}
@@ -213,7 +193,7 @@ export default function TrackerFrame() {
                 : 'bg-[#6b6b6b] opacity-60 translate-x-[-3px]'
             }`}
           >
-            <PixelSpiderMarker color="red" size={20} />
+            <PixelSpiderMarker color="red" size={22} />
           </button>
         </div>
 
@@ -273,10 +253,14 @@ export default function TrackerFrame() {
             onClose={() => setActiveOverlay(null)}
           />
 
-          {/* Spidey Game Modal */}
-          <SpideyGameModal
-            isOpen={activeOverlay === 'game'}
+          {/* 3D Spatial Signal Arena (Three.js WebGL) */}
+          <ThreeSignalArena
+            isOpen={activeOverlay === '3d_arena'}
             onClose={() => setActiveOverlay(null)}
+            onSelectNode={(node) => {
+              setActiveOverlay(null);
+              setSelectedDossierNode(node);
+            }}
           />
 
           {/* Project Dossier Modal */}
@@ -292,12 +276,12 @@ export default function TrackerFrame() {
         <div
           onClick={() => {
             soundEffects.thwip();
-            setActiveOverlay('game');
+            setActiveOverlay('3d_arena');
           }}
-          title="Click to play Spidey Engineering Quest!"
+          title="Click to explore 3D Spatial Signal Network!"
           className="absolute -bottom-2 -left-2 z-40 pointer-events-auto cursor-pointer animate-mascot hover:scale-110 transition-transform"
         >
-          <PixelMascot className="w-10 h-12 sm:w-13 sm:h-15 drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]" />
+          <PixelMascot className="w-10 h-12 sm:w-14 sm:h-16 drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]" />
         </div>
 
         {/* Bottom LED Ticker Bar & Sound Button */}
@@ -305,7 +289,7 @@ export default function TrackerFrame() {
           {/* Scrolling LED dot matrix marquee */}
           <div className="flex-1 bg-[#152332] border-2 sm:border-3 border-black h-7 sm:h-8 rounded-full overflow-hidden shadow-[inset_0_2px_4px_rgba(0,0,0,0.9),0_2px_0_rgba(255,255,255,0.2)] flex items-center px-4">
             <div className="animate-marquee whitespace-nowrap text-[9px] sm:text-xs font-silk text-[#9ae6ff] tracking-widest flex items-center gap-6">
-              <span>🎮 SPIDEY QUEST: LVL {gameState.level} ({gameState.xp} XP) ■ 🪙 {gameState.coins} COINS ■ 🔥 {gameState.streak} STREAK</span>
+              <span>🌐 3D SIGNAL NETWORK READY ■ CLICK ORBIT TO EXPLORE SPATIAL SIGNALS</span>
               <span>SANJAYKUMAR // SIGNAL NETWORK ■ M.TECH SE @ VIT (CGPA: 9.12 / 10.0) ■ GRADUATION 2028</span>
               <span>CAMPUSLLM: UNIVERSITY RAG ASSISTANT ACHIEVED ~3S AVERAGE LATENCY</span>
               <span>TFORCE INDIA ACADEMIC INTERN: ENTERPRISE GEN AI &amp; SAP BTP WORKFLOWS</span>
@@ -340,7 +324,7 @@ export default function TrackerFrame() {
           WATCH RESUME / DOSSIER
         </a>
 
-        {/* Center Game Quest Trigger & Branding */}
+        {/* Center 3D Arena Trigger & Branding */}
         <div className="flex flex-col items-center text-center">
           <div className="flex items-center gap-2">
             <h1 className="text-base sm:text-xl md:text-2xl font-silk font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-[#e52d27] via-[#ff6b6b] to-[#b31217] drop-shadow uppercase">
@@ -350,15 +334,15 @@ export default function TrackerFrame() {
             <button
               onClick={() => {
                 soundEffects.thwip();
-                setActiveOverlay('game');
+                setActiveOverlay('3d_arena');
               }}
-              className="px-2.5 py-0.5 rounded bg-yellow-500/20 border border-yellow-400 text-yellow-300 text-[10px] font-silk font-bold tracking-wider hover:bg-yellow-500/30 transition-all cursor-pointer animate-pulse"
+              className="px-3 py-1 rounded bg-yellow-500/20 border border-yellow-400 text-yellow-300 text-[11px] font-silk font-bold tracking-wider hover:bg-yellow-500/30 transition-all cursor-pointer animate-pulse"
             >
-              🎮 PLAY SPIDEY QUEST (LVL {gameState.level})
+              🌐 3D SIGNAL NETWORK
             </button>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-3 text-[10px] font-silk text-[#6da0c7] mt-0.5">
+          <div className="flex flex-wrap items-center justify-center gap-3 text-[10px] sm:text-[11px] font-silk text-[#6da0c7] mt-0.5">
             <a href={profile.github} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors cursor-pointer">
               GITHUB
             </a>
