@@ -26,8 +26,8 @@ export default function MapViewport({
 
     return `
       <div class="relative w-8 h-8 flex items-center justify-center cursor-pointer group">
-        <div class="absolute inset-0 rounded-full border-2 animate-ping opacity-25" style="border-color: ${themeLight};"></div>
-        <div class="w-7 h-7 rounded-full border-2 border-black flex items-center justify-center shadow-lg transition-transform group-hover:scale-125" style="background-color: ${themeBg}; box-shadow: inset 1px 1px 0 ${themeLight}, 0 4px 6px rgba(0,0,0,0.6);">
+        <div class="absolute inset-0 rounded-full border-2 animate-ping opacity-30" style="border-color: ${themeLight};"></div>
+        <div class="w-7 h-7 rounded-full border-2 border-black flex items-center justify-center shadow-lg transition-transform group-hover:scale-125" style="background-color: ${themeBg}; box-shadow: inset 1px 1px 0 ${themeLight}, 0 4px 6px rgba(0,0,0,0.7);">
           ${isStar ? `
             <svg viewBox="0 0 24 24" class="w-4 h-4" fill="black">
               <polygon points="12,2 15,9 22,9 17,14 19,21 12,17 5,21 7,14 2,9 9,9" />
@@ -59,12 +59,10 @@ export default function MapViewport({
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
-    // Destroy existing instance if any
     if (mapInstanceRef.current) {
       mapInstanceRef.current.remove();
     }
 
-    // Create Leaflet instance
     const map = L.map(mapContainerRef.current, {
       center: [20, 10],
       zoom: 2.2,
@@ -82,7 +80,19 @@ export default function MapViewport({
       maxZoom: 19,
     }).addTo(map);
 
+    // Invalidate size on mount and window resize so tiles fill instantly
+    const handleResize = () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.invalidateSize();
+      }
+    };
+
+    setTimeout(handleResize, 100);
+    setTimeout(handleResize, 500);
+    window.addEventListener('resize', handleResize);
+
     return () => {
+      window.removeEventListener('resize', handleResize);
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
@@ -90,23 +100,20 @@ export default function MapViewport({
     };
   }, []);
 
-  // Update Markers based on Filter State
+  // Update Markers when filters change
   useEffect(() => {
     const map = mapInstanceRef.current;
     if (!map) return;
 
-    // Clear previous markers
     markersRef.current.forEach((m) => map.removeLayer(m));
     markersRef.current = [];
 
-    // Filter active nodes
     const visibleNodes = trackerNodes.filter((node) => {
       if (node.status === 'CONFIRMED' && !confirmedActive) return false;
       if (node.status === 'RUMORED' && !rumoredActive) return false;
       return true;
     });
 
-    // Add new markers
     visibleNodes.forEach((node) => {
       const customIcon = L.divIcon({
         className: 'custom-pixel-marker',
@@ -148,7 +155,7 @@ export default function MapViewport({
 
   return (
     <div className="relative w-full h-full bg-[#0a111a] select-none overflow-hidden">
-      {/* Top Coordinate Rulers (Matching Screenshots) */}
+      {/* Top Coordinate Rulers (Matching Reference) */}
       <div className="absolute top-0 inset-x-0 h-4 bg-[#0a111a]/95 border-b border-[#1b2b3d] z-20 flex items-center justify-between px-3 text-[8px] font-mono text-[#4d7394] pointer-events-none">
         {['180°W', '120°W', '60°W', '0°', '60°E', '120°E', '180°E'].map((coord, i) => (
           <span key={i} className="flex flex-col items-center">
@@ -168,13 +175,12 @@ export default function MapViewport({
         ))}
       </div>
 
-      {/* Leaflet Map DOM Container */}
+      {/* Leaflet Map Canvas */}
       <div ref={mapContainerRef} className="w-full h-full z-0 cursor-crosshair" />
 
-      {/* Floating Dossier Preview Popup (Matching Screenshot 4 exactly) */}
+      {/* Floating Dossier Preview Popup */}
       {selectedPopupNode && (
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 w-72 sm:w-80 bg-[#101822] border-3 border-black rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_20px_rgba(77,130,164,0.5)] p-3 flex flex-col gap-2.5 animate-in fade-in zoom-in-95 duration-150">
-          {/* Card Image */}
           <div className="relative w-full h-28 rounded overflow-hidden border border-[#2b4157] bg-black">
             <img
               src={selectedPopupNode.thumbnail}
@@ -185,7 +191,7 @@ export default function MapViewport({
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
             <button
               onClick={() => setSelectedPopupNode(null)}
-              className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-black/80 border border-white/20 text-white flex items-center justify-center text-xs hover:bg-red-900 transition-colors"
+              className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-black/80 border border-white/20 text-white flex items-center justify-center text-xs hover:bg-red-900 transition-colors cursor-pointer"
             >
               ✕
             </button>
@@ -199,33 +205,31 @@ export default function MapViewport({
             </div>
           </div>
 
-          {/* Short Desc */}
           <p className="text-[11px] font-mono text-gray-300 line-clamp-2 px-1 leading-relaxed">
             {selectedPopupNode.shortDesc}
           </p>
 
-          {/* View Event / View Project Action Button */}
           <button
             onClick={() => {
               soundEffects.select();
               onSelectNode(selectedPopupNode);
               setSelectedPopupNode(null);
             }}
-            className="w-full py-2 rounded border-2 border-black bg-[#e8a838] hover:bg-[#ffd277] text-black font-silk text-xs font-bold uppercase tracking-wider transition-colors shadow-[0_3px_0_#000] active:translate-y-0.5 active:shadow-none"
+            className="w-full py-2 rounded border-2 border-black bg-[#e8a838] hover:bg-[#ffd277] text-black font-silk text-xs font-bold uppercase tracking-wider transition-colors shadow-[0_3px_0_#000] active:translate-y-0.5 active:shadow-none cursor-pointer"
           >
             VIEW EVENT / PROJECT
           </button>
         </div>
       )}
 
-      {/* Floating Status Notification Toast (Matching Screenshot 7 & 8) */}
+      {/* Floating Status Notification Toast */}
       {statusToast && (
         <div className="absolute top-8 left-1/2 -translate-x-1/2 z-40 bg-black/95 border-2 border-[#4d82a4] px-5 py-2 rounded shadow-2xl text-xs font-silk text-cyan-300 uppercase tracking-widest pointer-events-none">
           {statusToast}
         </div>
       )}
 
-      {/* Radar Scanner Widget (Bottom-Right, Matching Screenshots 2, 7, 8) */}
+      {/* Radar Scanner Widget (Bottom-Right) */}
       <div className="absolute bottom-2 right-2 z-20 pointer-events-auto">
         <PixelRadarWidget
           isGlobal={isGlobalView}
