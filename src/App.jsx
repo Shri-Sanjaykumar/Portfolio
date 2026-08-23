@@ -1,36 +1,10 @@
 import React from 'react';
-import Navbar from './components/Navbar';
-import Hero from './components/Hero';
-import About from './components/About';
-import Experience from './components/Experience';
-import Projects from './components/Projects';
-import Skills from './components/Skills';
-import Engineering from './components/Engineering';
-import Leadership from './components/Leadership';
-import Education from './components/Education';
-import Contact from './components/Contact';
-import Footer from './components/Footer';
-import ScrollProgress from './components/ScrollProgress';
+import TrackerFrame from './components/TrackerFrame';
 
-function App() {
+export default function App() {
   return (
-    <div className="relative">
-      <ScrollProgress />
-      <Navbar />
-      <main>
-        <Hero />
-        <About />
-        <Experience />
-        <Projects />
-        <Skills />
-        <Engineering />
-        <Leadership />
-        <Education />
-        <Contact />
-      </main>
-      <Footer />
+    <div className="w-full min-h-screen bg-[#0c1522] overflow-x-hidden">
+      <TrackerFrame />
     </div>
   );
 }
-
-export default App;

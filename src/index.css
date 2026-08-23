@@ -1,80 +1,211 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-pixel: 'Press Start 2P', monospace;
+  --font-silkscreen: 'Silkscreen', monospace;
+  --font-vt323: 'VT323', monospace;
+  --font-dot: 'DotGothic16', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 @layer utilities {
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-  .gradient-text {
-    background: linear-gradient(135deg, #ffffff 0%, #a0a0b0 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  
+  .font-pixel {
+    font-family: var(--font-pixel);
   }
-  .accent-gradient-text {
-    background: linear-gradient(135deg, #818cf8 0%, #c4b5fd 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  .font-silk {
+    font-family: var(--font-silkscreen);
+  }
+  .font-vt {
+    font-family: var(--font-vt323);
+  }
+  .font-dot {
+    font-family: var(--font-dot);
+  }
+
+  /* Pixel Border Utility */
+  .pixel-border-sm {
+    box-shadow: 
+      -2px 0 0 0 #000,
+      2px 0 0 0 #000,
+      0 -2px 0 0 #000,
+      0 2px 0 0 #000;
+  }
+  
+  .pixel-border-md {
+    box-shadow: 
+      -3px 0 0 0 #000,
+      3px 0 0 0 #000,
+      0 -3px 0 0 #000,
+      0 3px 0 0 #000;
+  }
+
+  /* Arcade Yellow Button */
+  .btn-arcade-yellow {
+    background: #e8a838;
+    color: #000;
+    border: 3px solid #000;
+    box-shadow: inset 2px 2px 0px #ffd277, inset -2px -2px 0px #b0781a, 0 4px 0 #000;
+    font-family: var(--font-silkscreen);
+    transition: all 0.08s ease;
+  }
+  .btn-arcade-yellow:hover {
+    background: #f5b94e;
+    transform: translateY(1px);
+    box-shadow: inset 2px 2px 0px #ffe199, inset -2px -2px 0px #c48820, 0 3px 0 #000;
+  }
+  .btn-arcade-yellow:active {
+    transform: translateY(4px);
+    box-shadow: inset 2px 2px 0px #b0781a, inset -2px -2px 0px #ffd277, 0 0 0 #000;
+  }
+
+  /* Arcade Green Button (Sound / Confirm) */
+  .btn-arcade-green {
+    background: #79a86b;
+    color: #000;
+    border: 3px solid #000;
+    box-shadow: inset 2px 2px 0px #9dd48d, inset -2px -2px 0px #537d47, 0 3px 0 #000;
+    transition: all 0.08s ease;
+  }
+  .btn-arcade-green:hover {
+    background: #88be79;
+    transform: translateY(1px);
+    box-shadow: inset 2px 2px 0px #b4ebb4, inset -2px -2px 0px #5c8b50, 0 2px 0 #000;
+  }
+  .btn-arcade-green:active {
+    transform: translateY(3px);
+    box-shadow: inset 2px 2px 0px #537d47, inset -2px -2px 0px #9dd48d, 0 0 0 #000;
+  }
+
+  /* Arcade Dark Bezel Button */
+  .btn-arcade-dark {
+    background: #1b242e;
+    color: #e2f0fb;
+    border: 2px solid #000;
+    box-shadow: inset 1px 1px 0px #314254, inset -1px -1px 0px #0e141a;
+  }
+  .btn-arcade-dark:hover {
+    background: #253342;
+    color: #fff;
+  }
+
+  /* Radar Sweep Animation */
+  @keyframes radar-sweep {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .animate-radar-sweep {
+    animation: radar-sweep 4s linear infinite;
+    transform-origin: center center;
+  }
+
+  /* Ticker Marquee Animation */
+  @keyframes marquee {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .animate-marquee {
+    display: flex;
+    width: max-content;
+    animation: marquee 28s linear infinite;
+  }
+  .animate-marquee:hover {
+    animation-play-state: paused;
+  }
+
+  /* Mascot Swing Animation */
+  @keyframes swing {
+    0%, 100% { transform: rotate(-5deg); }
+    50% { transform: rotate(5deg); }
+  }
+  .animate-swing {
+    transform-origin: top center;
+    animation: swing 3s ease-in-out infinite;
+  }
+
+  /* Mascot Bounce Animation */
+  @keyframes mascot-bounce {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-4px) scale(1.03); }
+  }
+  .animate-mascot {
+    animation: mascot-bounce 2s ease-in-out infinite;
+  }
+
+  /* Pulse Glow */
+  @keyframes marker-pulse {
+    0% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(1.35); opacity: 0.3; }
+    100% { transform: scale(1.6); opacity: 0; }
+  }
+  .animate-marker-pulse {
+    animation: marker-pulse 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
+  }
+
+  /* Scanline effect */
+  .scanline-overlay {
+    background: linear-gradient(
+      rgba(18, 16, 16, 0) 50%, 
+      rgba(0, 0, 0, 0.25) 50%
+    ), linear-gradient(
+      90deg,
+      rgba(255, 0, 0, 0.03),
+      rgba(0, 255, 0, 0.01),
+      rgba(0, 0, 255, 0.03)
+    );
+    background-size: 100% 3px, 6px 100%;
+    pointer-events: none;
   }
 }
 
-@keyframes shimmer {
-  100% { transform: translateX(200%); }
+/* Custom Scrollbar for Retro HUD */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-8px); }
+::-webkit-scrollbar-track {
+  background: #0f1620;
+  border: 1px solid #1a2738;
 }
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(129, 140, 248, 0.1); }
-  50% { box-shadow: 0 0 40px rgba(129, 140, 248, 0.25); }
+::-webkit-scrollbar-thumb {
+  background: #4d82a4;
+  border-radius: 0px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #6ea4c8;
 }
 
-* { box-sizing: border-box; }
-
-body, html {
+/* Base Body Styles */
+html, body {
   margin: 0;
   padding: 0;
-  width: 100vw;
+  background-color: #0c1521;
+  color: #fff;
   min-height: 100vh;
+  width: 100%;
   overflow-x: hidden;
-  background-color: #050508;
-  color: white;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
-::selection {
-  background: rgba(129, 140, 248, 0.3);
-  color: white;
+/* Focus styles for accessibility */
+:focus-visible {
+  outline: 2px solid #ffd277;
+  outline-offset: 2px;
 }
 
-/* Smooth scrolling */
-html { scroll-behavior: smooth; }
-
-/* Reduced motion support */
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  html { scroll-behavior: auto; }
 }
-
-/* Focus styles for accessibility */
-:focus-visible {
-  outline: 2px solid #818cf8;
-  outline-offset: 3px;
-  border-radius: 4px;
-}
-
-/* Scrollbar styling */
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: #050508; }
-::-webkit-scrollbar-thumb { background: #2a2a3a; border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: #818cf8; }
