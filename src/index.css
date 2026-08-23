@@ -92,6 +92,26 @@
     color: #fff;
   }
 
+  /* Web Expand Animation (THWIP Click Effect) */
+  @keyframes webExpand {
+    0% {
+      transform: translate(-50%, -50%) scale(0.2) rotate(0deg);
+      opacity: 1;
+    }
+    50% {
+      transform: translate(-50%, -50%) scale(1.1) rotate(12deg);
+      opacity: 0.95;
+    }
+    100% {
+      transform: translate(-50%, -50%) scale(1.4) rotate(24deg);
+      opacity: 0;
+    }
+  }
+
+  .animate-web-expand {
+    animation: webExpand 0.55s ease-out forwards;
+  }
+
   /* Radar Sweep Animation */
   @keyframes radar-sweep {
     from {
@@ -124,12 +144,12 @@
 
   /* Mascot Swing Animation */
   @keyframes swing {
-    0%, 100% { transform: rotate(-5deg); }
-    50% { transform: rotate(5deg); }
+    0%, 100% { transform: rotate(-6deg); }
+    50% { transform: rotate(6deg); }
   }
   .animate-swing {
     transform-origin: top center;
-    animation: swing 3s ease-in-out infinite;
+    animation: swing 3.5s ease-in-out infinite;
   }
 
   /* Mascot Bounce Animation */
@@ -160,7 +180,7 @@
       90deg,
       rgba(255, 0, 0, 0.03),
       rgba(0, 255, 0, 0.01),
-      rgba(0, 0, 255, 0.03)
+      rgba(0, 255, 0, 0.03)
     );
     background-size: 100% 3px, 6px 100%;
     pointer-events: none;
@@ -188,7 +208,7 @@
 html, body {
   margin: 0;
   padding: 0;
-  background-color: #0c1521;
+  background-color: #0a121d;
   color: #fff;
   min-height: 100vh;
   width: 100%;
@@ -199,13 +219,4 @@ html, body {
 :focus-visible {
   outline: 2px solid #ffd277;
   outline-offset: 2px;
-}
-
-/* Reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
 }

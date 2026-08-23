@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { profile } from '../data/portfolioData';
 import { PixelSpiderMask, PixelMascot, PixelSpeaker, PixelSpiderMarker } from './PixelIcons';
 import MapViewport from './MapViewport';
+import HangingSpiderman from './HangingSpiderman';
+import WebClickEffect from './WebClickEffect';
 import NavigationOverlay from './NavigationOverlay';
 import ActivityLogOverlay from './ActivityLogOverlay';
 import EngineeringWatchOverlay from './EngineeringWatchOverlay';
@@ -41,7 +43,7 @@ export default function TrackerFrame() {
     soundEffects.toggle();
     const next = !confirmedActive;
     setConfirmedActive(next);
-    triggerToast(`CONFIRMED SIGHTINGS: ${next ? 'ON' : 'OFF'}`);
+    triggerToast(`CONFIRMED PROJECTS: ${next ? 'ON' : 'OFF'}`);
   };
 
   // Toggle Rumored Sightings
@@ -49,7 +51,7 @@ export default function TrackerFrame() {
     soundEffects.toggle();
     const next = !rumoredActive;
     setRumoredActive(next);
-    triggerToast(`RUMORED SIGHTINGS: ${next ? 'ON' : 'OFF'}`);
+    triggerToast(`RUMORED LABS: ${next ? 'ON' : 'OFF'}`);
   };
 
   // Navigation menu selection router
@@ -74,13 +76,23 @@ export default function TrackerFrame() {
   };
 
   return (
-    <div className="h-screen w-full bg-[#0a121d] flex flex-col justify-between p-2 sm:p-3 md:p-4 font-sans text-white select-none overflow-hidden">
+    <div className="h-screen w-full bg-[#0a121d] flex flex-col justify-between p-2 sm:p-3 md:p-4 font-sans text-white select-none overflow-hidden relative">
       
+      {/* Global Interactive Web-Shooter Click Effect */}
+      <WebClickEffect />
+
       {/* ========================================================
           SLATE-BLUE RETRO MONITOR FRAME (Expanded Full Viewport)
           ======================================================== */}
       <div className="relative w-full max-w-[1540px] mx-auto flex-1 min-h-0 bg-[#5695bc] rounded-2xl md:rounded-3xl border-4 md:border-[6px] border-black p-2.5 sm:p-3.5 md:p-4 shadow-[0_20px_50px_rgba(0,0,0,0.8),inset_2px_2px_0_rgba(255,255,255,0.4),inset_-2px_-2px_0_rgba(0,0,0,0.4)] flex flex-col justify-between">
         
+        {/* Hanging Upside-Down Spider-Man on Web String */}
+        <HangingSpiderman
+          onClick={() => {
+            triggerToast('🕸️ SPIDER-SENSE TINGLING!');
+          }}
+        />
+
         {/* Top-Left Menu Button (Yellow Round Outline) */}
         <button
           onClick={() => {
@@ -88,9 +100,9 @@ export default function TrackerFrame() {
             setActiveOverlay(activeOverlay === 'nav' ? null : 'nav');
           }}
           aria-label="Toggle navigation menu"
-          className="absolute top-2 sm:top-2.5 left-2.5 sm:left-3.5 z-40 w-10 h-10 sm:w-11 sm:h-11 rounded-full border-3 border-[#e8a838] bg-[#1a2634] hover:bg-[#25374a] flex items-center justify-center shadow-[0_4px_0_#000] transition-transform active:scale-95 cursor-pointer"
+          className="absolute top-2 sm:top-2.5 left-2.5 sm:left-3.5 z-40 w-10 h-10 sm:w-11 sm:h-11 rounded-full border-3 border-[#e8a838] bg-[#1a2634] hover:bg-[#25374a] flex items-center justify-center shadow-[0_4px_0_#000] transition-transform active:scale-95 cursor-pointer group"
         >
-          <div className="flex flex-col gap-1 items-center justify-center">
+          <div className="flex flex-col gap-1 items-center justify-center group-hover:scale-110 transition-transform">
             <span className="w-4 sm:w-5 h-0.5 sm:h-1 bg-[#e8a838] rounded-sm" />
             <span className="w-4 sm:w-5 h-0.5 sm:h-1 bg-[#e8a838] rounded-sm" />
             <span className="w-4 sm:w-5 h-0.5 sm:h-1 bg-[#e8a838] rounded-sm" />
@@ -127,7 +139,7 @@ export default function TrackerFrame() {
           {/* Confirmed Sighting Filter Tab */}
           <button
             onClick={handleToggleConfirmed}
-            title="Toggle Confirmed Sightings"
+            title="Toggle Confirmed Projects"
             className={`w-8 sm:w-10 h-8 sm:h-10 rounded-r-lg border-2 border-black flex items-center justify-center shadow-md transition-all cursor-pointer ${
               confirmedActive
                 ? 'bg-[#79a86b] translate-x-0'
@@ -140,7 +152,7 @@ export default function TrackerFrame() {
           {/* Rumored Sighting Filter Tab */}
           <button
             onClick={handleToggleRumored}
-            title="Toggle Rumored Sightings"
+            title="Toggle Rumored Research Labs"
             className={`w-8 sm:w-10 h-8 sm:h-10 rounded-r-lg border-2 border-black flex items-center justify-center shadow-md transition-all cursor-pointer ${
               rumoredActive
                 ? 'bg-[#e6e6e6] translate-x-0'
@@ -249,7 +261,7 @@ export default function TrackerFrame() {
       {/* ========================================================
           BOTTOM INTEGRATED ACTION BAR & HERO BRANDING
           ======================================================== */}
-      <div className="w-full max-w-[1540px] mx-auto mt-2 flex flex-col md:flex-row items-center justify-between gap-2.5 px-2">
+      <div className="w-full max-w-[1540px] mx-auto mt-2 flex flex-col md:flex-row items-center justify-between gap-2 px-2">
         {/* Left Action Button */}
         <a
           href={profile.resumeUrl}
