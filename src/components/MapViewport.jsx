@@ -9,7 +9,8 @@ export default function MapViewport({
   rumoredActive = true,
   onSelectNode,
   statusToast = null,
-  onTriggerToast
+  onTriggerToast,
+  onOpenActivityLog
 }) {
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
@@ -155,7 +156,7 @@ export default function MapViewport({
 
   return (
     <div className="relative w-full h-full bg-[#0a111a] select-none overflow-hidden">
-      {/* Top Coordinate Rulers (Matching Reference) */}
+      {/* Top Coordinate Rulers (Matching Reference Screenshot) */}
       <div className="absolute top-0 inset-x-0 h-4 bg-[#0a111a]/95 border-b border-[#1b2b3d] z-20 flex items-center justify-between px-3 text-[8px] font-mono text-[#4d7394] pointer-events-none">
         {['180°W', '120°W', '60°W', '0°', '60°E', '120°E', '180°E'].map((coord, i) => (
           <span key={i} className="flex flex-col items-center">
@@ -173,6 +174,25 @@ export default function MapViewport({
             <span className="-rotate-90 origin-center text-[7px]">{coord}</span>
           </span>
         ))}
+      </div>
+
+      {/* Floating Center Notification Card (Matching Screenshot media_1787520704200.png) */}
+      <div className="absolute top-7 left-1/2 -translate-x-1/2 z-20 pointer-events-auto">
+        <div 
+          onClick={onOpenActivityLog}
+          className="bg-[#f0ad38] border-2 sm:border-3 border-black rounded-lg px-4 sm:px-6 py-1.5 sm:py-2 shadow-[0_4px_0_#000] flex flex-col items-center cursor-pointer hover:bg-[#ffc355] transition-transform active:scale-95 group"
+        >
+          <div className="flex items-center gap-2 text-[9px] sm:text-[10px] font-pixel text-black font-bold">
+            <span>00:00</span>
+            <div className="w-5 h-5 rounded-full bg-red-600 border border-black flex items-center justify-center">
+              <div className="w-3 h-3 bg-white rounded-full" />
+            </div>
+            <span>00:00</span>
+          </div>
+          <div className="text-[10px] sm:text-xs font-silk font-bold text-black uppercase tracking-wider mt-0.5 whitespace-nowrap">
+            {trackerNodes.length} ACTIVE ENGINEERING SIGNALS
+          </div>
+        </div>
       </div>
 
       {/* Leaflet Map Canvas */}
@@ -224,7 +244,7 @@ export default function MapViewport({
 
       {/* Floating Status Notification Toast */}
       {statusToast && (
-        <div className="absolute top-8 left-1/2 -translate-x-1/2 z-40 bg-black/95 border-2 border-[#4d82a4] px-5 py-2 rounded shadow-2xl text-xs font-silk text-cyan-300 uppercase tracking-widest pointer-events-none">
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-40 bg-black/95 border-2 border-[#4d82a4] px-5 py-2 rounded shadow-2xl text-xs font-silk text-cyan-300 uppercase tracking-widest pointer-events-none">
           {statusToast}
         </div>
       )}

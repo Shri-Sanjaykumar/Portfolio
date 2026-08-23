@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { profile } from '../data/portfolioData';
 import { PixelSpiderMask, PixelMascot, PixelSpeaker, PixelSpiderMarker } from './PixelIcons';
 import MapViewport from './MapViewport';
 import HangingSpiderman from './HangingSpiderman';
 import WebClickEffect from './WebClickEffect';
+import CinematicIntro from './CinematicIntro';
 import NavigationOverlay from './NavigationOverlay';
 import ActivityLogOverlay from './ActivityLogOverlay';
 import EngineeringWatchOverlay from './EngineeringWatchOverlay';
@@ -18,12 +19,34 @@ import { setSoundEnabled, getSoundEnabled, soundEffects } from '../utils/audio';
 
 export default function TrackerFrame() {
   const { gameState, recentUnlock } = useGame();
+  const [showIntro, setShowIntro] = useState(() => {
+    try {
+      return !localStorage.getItem('hasSeenSanjayIntro_v1');
+    } catch (e) {
+      return true;
+    }
+  });
+
   const [isSoundOn, setIsSoundOn] = useState(false);
   const [confirmedActive, setConfirmedActive] = useState(true);
   const [rumoredActive, setRumoredActive] = useState(true);
   const [activeOverlay, setActiveOverlay] = useState(null); // 'nav' | 'activity' | 'watch' | 'connect' | 'skills' | 'leadership' | 'education' | 'help' | 'game'
   const [selectedDossierNode, setSelectedDossierNode] = useState(null);
   const [statusToast, setStatusToast] = useState(null);
+
+  // Complete Intro
+  const handleIntroComplete = () => {
+    setShowIntro(false);
+    try {
+      localStorage.setItem('hasSeenSanjayIntro_v1', 'true');
+    } catch (e) {}
+  };
+
+  // Replay Intro
+  const handleReplayIntro = () => {
+    soundEffects.open();
+    setShowIntro(true);
+  };
 
   // Trigger floating status toast
   const triggerToast = (msg) => {
@@ -86,6 +109,11 @@ export default function TrackerFrame() {
       {/* Global Interactive Web-Shooter Click Effect */}
       <WebClickEffect />
 
+      {/* Cinematic Initialization Sequence (2.5s with Instant Skip) */}
+      {showIntro && (
+        <CinematicIntro onComplete={handleIntroComplete} />
+      )}
+
       {/* Achievement Unlock Popup */}
       {recentUnlock && (
         <div className="fixed top-4 right-4 z-50 bg-[#102030] border-3 border-yellow-400 rounded-xl p-3 shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
@@ -117,19 +145,20 @@ export default function TrackerFrame() {
           }}
         />
 
-        {/* Top-Left Menu Button (Yellow Round Outline) */}
+        {/* Top-Left Menu Button (Yellow Round Outline with Glowing Spidey Mask Eyes) */}
         <button
           onClick={() => {
             soundEffects.open();
             setActiveOverlay(activeOverlay === 'nav' ? null : 'nav');
           }}
           aria-label="Toggle navigation menu"
-          className="absolute top-2 sm:top-2.5 left-2.5 sm:left-3.5 z-40 w-10 h-10 sm:w-11 sm:h-11 rounded-full border-3 border-[#e8a838] bg-[#1a2634] hover:bg-[#25374a] flex items-center justify-center shadow-[0_4px_0_#000] transition-transform active:scale-95 cursor-pointer group"
+          className="absolute top-2 sm:top-2.5 left-2.5 sm:left-3.5 z-40 w-10 h-10 sm:w-11 sm:h-11 rounded-full border-3 sm:border-4 border-[#e8a838] bg-[#1a2634] hover:bg-[#25374a] flex items-center justify-center shadow-[0_4px_0_#000] transition-transform active:scale-95 cursor-pointer group"
+          title="Open Navigation Menu"
         >
-          <div className="flex flex-col gap-1 items-center justify-center group-hover:scale-110 transition-transform">
-            <span className="w-4 sm:w-5 h-0.5 sm:h-1 bg-[#e8a838] rounded-sm" />
-            <span className="w-4 sm:w-5 h-0.5 sm:h-1 bg-[#e8a838] rounded-sm" />
-            <span className="w-4 sm:w-5 h-0.5 sm:h-1 bg-[#e8a838] rounded-sm" />
+          {/* Spidey Eye Mask Eyes matching Screenshot media_1787520704200.png */}
+          <div className="flex items-center gap-1 group-hover:scale-110 transition-transform">
+            <div className="w-2.5 h-3.5 bg-white rounded-t-sm rounded-bl-lg border border-black transform rotate-[-12deg] shadow-[0_0_4px_white]" />
+            <div className="w-2.5 h-3.5 bg-white rounded-t-sm rounded-br-lg border border-black transform rotate-[12deg] shadow-[0_0_4px_white]" />
           </div>
         </button>
 
@@ -152,6 +181,7 @@ export default function TrackerFrame() {
           }}
           aria-label="Open Message Center"
           className="absolute top-2 sm:top-2.5 right-2.5 sm:right-3.5 z-40 w-10 h-10 sm:w-11 sm:h-11 rounded-lg border-2 sm:border-3 border-black bg-white hover:bg-gray-100 flex items-center justify-center shadow-[0_4px_0_#000] transition-transform active:scale-95 cursor-pointer group"
+          title="Open Message & Transmission Center"
         >
           <div className="transform group-hover:scale-110 transition-transform">
             <PixelSpiderMarker color="white" size={22} />
@@ -187,7 +217,7 @@ export default function TrackerFrame() {
           </button>
         </div>
 
-        {/* Inner Viewport Screen (Real Leaflet Map) */}
+        {/* Inner Viewport Screen (Real Tactical Map) */}
         <div className="relative flex-1 w-full rounded-xl overflow-hidden border-2 sm:border-3 border-black shadow-[inset_0_4px_12px_rgba(0,0,0,0.8)] bg-[#0a111a] mt-7 sm:mt-8 mb-7 sm:mb-8 min-h-0">
           <MapViewport
             confirmedActive={confirmedActive}
@@ -195,6 +225,7 @@ export default function TrackerFrame() {
             onSelectNode={(node) => setSelectedDossierNode(node)}
             statusToast={statusToast}
             onTriggerToast={triggerToast}
+            onOpenActivityLog={() => setActiveOverlay('activity')}
           />
 
           {/* Navigation Overlay */}
@@ -275,8 +306,7 @@ export default function TrackerFrame() {
           <div className="flex-1 bg-[#152332] border-2 sm:border-3 border-black h-7 sm:h-8 rounded-full overflow-hidden shadow-[inset_0_2px_4px_rgba(0,0,0,0.9),0_2px_0_rgba(255,255,255,0.2)] flex items-center px-4">
             <div className="animate-marquee whitespace-nowrap text-[9px] sm:text-xs font-silk text-[#9ae6ff] tracking-widest flex items-center gap-6">
               <span>🎮 SPIDEY QUEST: LVL {gameState.level} ({gameState.xp} XP) ■ 🪙 {gameState.coins} COINS ■ 🔥 {gameState.streak} STREAK</span>
-              <span>SHARE YOUR ENGINEERING SIGHTINGS ON X ■ SIGHTING BY @SHRI_SANJAYKUMAR</span>
-              <span>M.TECH INTEGRATED SE @ VIT (CGPA: 9.12 / 10.0) ■ GRADUATION 2028</span>
+              <span>SANJAYKUMAR // SIGNAL NETWORK ■ M.TECH SE @ VIT (CGPA: 9.12 / 10.0) ■ GRADUATION 2028</span>
               <span>CAMPUSLLM: UNIVERSITY RAG ASSISTANT ACHIEVED ~3S AVERAGE LATENCY</span>
               <span>TFORCE INDIA ACADEMIC INTERN: ENTERPRISE GEN AI &amp; SAP BTP WORKFLOWS</span>
               <span>LEGITIFY: DEVSECOPS &amp; REPO COMPLIANCE AUDITOR ■ SOLAR ML: 7-DAY PREDICTION</span>
@@ -349,6 +379,14 @@ export default function TrackerFrame() {
               className="hover:text-white transition-colors cursor-pointer"
             >
               ACTIVITY LOG
+            </button>
+            <span>•</span>
+            <button
+              onClick={handleReplayIntro}
+              className="hover:text-white transition-colors cursor-pointer"
+              title="Replay cinematic initialization sequence"
+            >
+              REPLAY INTRO
             </button>
             <span>•</span>
             <button
