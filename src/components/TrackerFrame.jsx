@@ -81,9 +81,9 @@ export default function TrackerFrame() {
       <div className="w-full max-w-[1440px] mx-auto flex flex-col items-center">
         
         {/* ========================================================
-            SLATE-BLUE RETRO MONITOR FRAME (Matching Reference)
+            SLATE-BLUE RETRO MONITOR FRAME (Matching Screenshots)
             ======================================================== */}
-        <div className="relative w-full aspect-[16/10] sm:aspect-[16/9] min-h-[520px] max-h-[80vh] bg-[#4d82a4] rounded-2xl md:rounded-3xl border-4 md:border-[6px] border-black p-3 sm:p-4 md:p-5 shadow-[0_20px_50px_rgba(0,0,0,0.8),inset_2px_2px_0_rgba(255,255,255,0.4),inset_-2px_-2px_0_rgba(0,0,0,0.4)] flex flex-col">
+        <div className="relative w-full aspect-[16/10] sm:aspect-[16/9] min-h-[540px] max-h-[82vh] bg-[#5695bc] rounded-2xl md:rounded-3xl border-4 md:border-[6px] border-black p-3 sm:p-4 md:p-5 shadow-[0_20px_50px_rgba(0,0,0,0.8),inset_2px_2px_0_rgba(255,255,255,0.4),inset_-2px_-2px_0_rgba(0,0,0,0.4)] flex flex-col">
           
           {/* Top-Left Menu Button (Yellow Round Outline, Screenshot 2) */}
           <button
@@ -155,8 +155,8 @@ export default function TrackerFrame() {
             </button>
           </div>
 
-          {/* Inner Viewport Screen (Real Leaflet Map) */}
-          <div className="relative flex-1 w-full rounded-xl overflow-hidden border-2 sm:border-3 border-black shadow-[inset_0_4px_12px_rgba(0,0,0,0.8)] bg-black mt-8 sm:mt-10 mb-8 sm:mb-10">
+          {/* Inner Viewport Screen (Real Tactical Map) */}
+          <div className="relative flex-1 w-full rounded-xl overflow-hidden border-2 sm:border-3 border-black shadow-[inset_0_4px_12px_rgba(0,0,0,0.8)] bg-[#0a111a] mt-8 sm:mt-10 mb-8 sm:mb-10">
             <MapViewport
               confirmedActive={confirmedActive}
               rumoredActive={rumoredActive}
@@ -269,20 +269,20 @@ export default function TrackerFrame() {
             href={profile.resumeUrl}
             download
             onClick={() => soundEffects.click()}
-            className="px-5 sm:px-8 py-2.5 rounded-lg btn-arcade-yellow text-xs sm:text-sm font-bold tracking-wider uppercase text-center shadow-lg"
+            className="px-5 sm:px-8 py-2.5 rounded-lg btn-arcade-yellow text-xs sm:text-sm font-bold tracking-wider uppercase text-center shadow-lg cursor-pointer"
           >
             WATCH RESUME / DOSSIER
           </a>
 
-          {/* Center Guide Trigger */}
+          {/* Center Activity Log Quick Action */}
           <button
             onClick={() => {
               soundEffects.open();
-              setActiveOverlay('help');
+              setActiveOverlay('activity');
             }}
             className="hidden md:flex px-4 py-2 rounded-lg bg-[#1a2d40] border-2 border-black text-[11px] font-silk text-cyan-300 hover:bg-[#25405c] transition-all tracking-wider shadow cursor-pointer"
           >
-            ❓ CONTROLS GUIDE
+            📋 ACTIVITY LOG
           </button>
 
           {/* Right Action Button (Get Tickets / Connect) */}
@@ -320,7 +320,7 @@ export default function TrackerFrame() {
               href={profile.github}
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-white transition-colors"
+              className="hover:text-white transition-colors cursor-pointer"
             >
               GITHUB
             </a>
@@ -329,14 +329,14 @@ export default function TrackerFrame() {
               href={profile.linkedin}
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-white transition-colors"
+              className="hover:text-white transition-colors cursor-pointer"
             >
               LINKEDIN
             </a>
             <span>•</span>
             <a
               href={`mailto:${profile.email}`}
-              className="hover:text-white transition-colors"
+              className="hover:text-white transition-colors cursor-pointer"
             >
               EMAIL
             </a>
@@ -344,7 +344,7 @@ export default function TrackerFrame() {
             <a
               href={profile.resumeUrl}
               download
-              className="hover:text-white transition-colors"
+              className="hover:text-white transition-colors cursor-pointer"
             >
               RESUME
             </a>

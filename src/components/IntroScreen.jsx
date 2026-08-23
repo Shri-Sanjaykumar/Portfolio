@@ -22,21 +22,26 @@ export default function IntroScreen({ onStartTracking }) {
   useEffect(() => {
     const timer = setInterval(() => {
       setBootIndex((prev) => (prev < bootLogs.length ? prev + 1 : prev));
-    }, 180);
+    }, 150);
     return () => clearInterval(timer);
   }, [bootLogs.length]);
 
   const handleChoice = (enableAudio) => {
-    setSoundEnabled(enableAudio);
-    if (enableAudio) {
-      soundEffects.intro();
+    try {
+      setSoundEnabled(enableAudio);
+      if (enableAudio) {
+        soundEffects.intro();
+      } else {
+        soundEffects.click();
+      }
+    } catch (e) {
+      console.warn('Audio opt-in error:', e);
     }
-    soundEffects.click();
     onStartTracking();
   };
 
   return (
-    <div className="absolute inset-0 z-50 bg-[#0d1622]/95 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center select-none overflow-hidden scanline-overlay">
+    <div className="absolute inset-0 z-50 bg-[#0d1622]/95 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center select-none overflow-hidden scanline-overlay transition-opacity duration-300">
       {/* Background Subtle Radar Grid */}
       <div 
         className="absolute inset-0 opacity-10 pointer-events-none"
@@ -58,19 +63,19 @@ export default function IntroScreen({ onStartTracking }) {
       {/* Main Intro Center Card */}
       <div className="relative z-10 max-w-xl w-full flex flex-col items-center">
         {/* Hanging Web Line from Ceiling */}
-        <div className="w-[1.5px] h-16 bg-white/70 shadow-[0_0_8px_white]" />
+        <div className="w-[1.5px] h-14 bg-white/70 shadow-[0_0_8px_white]" />
         
         {/* Hanging Pixel Mascot Animation */}
-        <div className="animate-swing mb-6 -mt-1">
+        <div className="animate-swing mb-5 -mt-1">
           <PixelMascot className="w-16 h-20 drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)]" />
         </div>
 
         {/* Welcome Message Heading */}
-        <h2 className="text-sm md:text-base font-silk text-[#e2f0fb] leading-relaxed tracking-wider mb-4 max-w-md">
+        <h2 className="text-xs sm:text-sm md:text-base font-silk text-[#e2f0fb] leading-relaxed tracking-wider mb-3 max-w-md">
           WELCOME TO THE <span className="text-cyan-400 font-bold">SANJAYKUMAR</span> TRACKER.
         </h2>
 
-        <p className="text-xs md:text-sm font-silk text-[#8cb0cc] leading-relaxed tracking-wide mb-6 max-w-lg">
+        <p className="text-[11px] sm:text-xs md:text-sm font-silk text-[#8cb0cc] leading-relaxed tracking-wide mb-5 max-w-lg">
           INTERACT WITH THE MAP TO VIEW
           <br />
           <span className="text-white font-bold">ENGINEERING MILESTONES &amp; PROJECTS</span>
@@ -79,7 +84,7 @@ export default function IntroScreen({ onStartTracking }) {
         </p>
 
         {/* 8-bit Animated Progress Blocks */}
-        <div className="flex items-center gap-1.5 mb-8">
+        <div className="flex items-center gap-1.5 mb-6">
           {[...Array(8)].map((_, i) => (
             <div
               key={i}
@@ -92,20 +97,20 @@ export default function IntroScreen({ onStartTracking }) {
         </div>
 
         {/* Audio Choice Prompts */}
-        <p className="text-[11px] font-silk text-[#5b83a3] uppercase tracking-widest mb-4">
+        <p className="text-[10px] sm:text-[11px] font-silk text-[#5b83a3] uppercase tracking-widest mb-4">
           CHOOSE YOUR SETTINGS AND START TRACKING
         </p>
 
         <div className="flex flex-wrap items-center justify-center gap-4">
           <button
             onClick={() => handleChoice(true)}
-            className="px-6 py-3 rounded border-2 border-black bg-[#4d82a4] hover:bg-[#689ec4] text-white font-silk text-xs tracking-widest uppercase transition-all shadow-[0_4px_0_#000] active:translate-y-1 active:shadow-none"
+            className="px-6 sm:px-8 py-2.5 sm:py-3 rounded border-2 border-black bg-[#4d82a4] hover:bg-[#689ec4] text-white font-silk text-xs tracking-widest uppercase transition-all shadow-[0_4px_0_#000] active:translate-y-1 active:shadow-none cursor-pointer"
           >
             SOUND ON
           </button>
           <button
             onClick={() => handleChoice(false)}
-            className="px-6 py-3 rounded border-2 border-black bg-[#1b2b3a] hover:bg-[#283f54] text-gray-300 font-silk text-xs tracking-widest uppercase transition-all shadow-[0_4px_0_#000] active:translate-y-1 active:shadow-none"
+            className="px-6 sm:px-8 py-2.5 sm:py-3 rounded border-2 border-black bg-[#1b2b3a] hover:bg-[#283f54] text-gray-300 font-silk text-xs tracking-widest uppercase transition-all shadow-[0_4px_0_#000] active:translate-y-1 active:shadow-none cursor-pointer"
           >
             SOUND OFF
           </button>

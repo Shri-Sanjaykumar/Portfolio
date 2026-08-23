@@ -10,16 +10,16 @@ export default function NavigationOverlay({
   if (!isOpen) return null;
 
   const menuItems = [
-    { id: 'tracker', label: 'TRACKER (MAP VIEW)' },
+    { id: 'tracker', label: 'MAP TRACKER' },
     { id: 'activity', label: 'ACTIVITY LOG' },
-    { id: 'projects', label: 'PROJECTS' },
-    { id: 'experience', label: 'EXPERIENCE' },
-    { id: 'watch', label: 'ENGINEERING WATCH' },
+    { id: 'projects', label: 'PROJECTS & MISSIONS' },
+    { id: 'experience', label: 'EXPERIENCE (TFORCE)' },
+    { id: 'watch', label: 'WEB WATCH 1.0' },
     { id: 'skills', label: 'SKILLS & ARCHITECTURE' },
-    { id: 'leadership', label: 'LEADERSHIP' },
-    { id: 'education', label: 'EDUCATION' },
-    { id: 'connect', label: 'CONNECT WITH ME' },
-    { id: 'help', label: 'HELP / GUIDE' },
+    { id: 'leadership', label: 'EVENTS & LEADERSHIP' },
+    { id: 'education', label: 'EDUCATION (VIT)' },
+    { id: 'connect', label: 'MESSAGE CENTER' },
+    { id: 'help', label: 'HELP & GUIDE' },
   ];
 
   const handleItemClick = (id) => {
@@ -29,30 +29,30 @@ export default function NavigationOverlay({
   };
 
   return (
-    <div 
-      className="absolute inset-0 z-40 bg-[#0d1622]/90 backdrop-blur-md flex items-center p-6 md:p-12 select-none"
+    <div
+      className="absolute inset-0 z-40 bg-[#0d1622]/90 backdrop-blur-sm flex items-stretch p-4 sm:p-8 select-none scanline-overlay"
       onClick={onClose}
     >
-      <div 
-        className="max-w-md w-full flex flex-col gap-5 bg-[#0f1926]/95 border-2 border-black p-6 md:p-8 rounded-lg shadow-2xl"
+      <div
+        className="w-full max-w-sm flex flex-col justify-center gap-4 bg-[#121e2b]/95 border-2 border-black p-6 sm:p-8 rounded-xl shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-[#22384f] pb-4 mb-2">
-          <div className="text-xs font-pixel text-cyan-400 tracking-widest">
+        <div className="flex items-center justify-between border-b border-[#22384f] pb-3 mb-1">
+          <span className="text-[10px] font-pixel text-cyan-400 uppercase tracking-widest">
             NAVIGATION
-          </div>
+          </span>
           <button
             onClick={() => {
               soundEffects.close();
               onClose();
             }}
-            className="w-7 h-7 rounded border border-black bg-[#1f3144] hover:bg-[#324d6b] text-white flex items-center justify-center font-silk text-xs"
+            className="text-[11px] font-silk text-[#8cb0cc] hover:text-white transition-colors cursor-pointer"
           >
-            ✕
+            ✕ CLOSE
           </button>
         </div>
 
-        <nav className="flex flex-col space-y-3" aria-label="Main menu">
+        <nav className="flex flex-col space-y-2.5" aria-label="Main menu">
           {menuItems.map((item) => {
             const isActive = activeView === item.id;
             return (
@@ -60,10 +60,10 @@ export default function NavigationOverlay({
                 key={item.id}
                 onClick={() => handleItemClick(item.id)}
                 onMouseEnter={() => soundEffects.click()}
-                className={`text-left font-silk text-xs md:text-sm tracking-widest py-2 px-3 rounded transition-all duration-100 flex items-center justify-between border ${
+                className={`text-left font-silk text-xs sm:text-sm tracking-widest py-2 px-3 rounded transition-all duration-100 flex items-center justify-between cursor-pointer ${
                   isActive
-                    ? 'text-[#f5a742] bg-[#f5a742]/10 border-[#f5a742]/40 font-bold translate-x-1'
-                    : 'text-[#d6e7f7] hover:text-white hover:bg-[#20364d]/60 border-transparent hover:border-[#38597a]'
+                    ? 'text-[#f5a742] bg-[#f5a742]/15 font-bold translate-x-1'
+                    : 'text-[#d8e8f8] hover:text-white hover:bg-[#20364d]/60'
                 }`}
               >
                 <span>{item.label}</span>
