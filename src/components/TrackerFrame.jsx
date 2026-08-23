@@ -12,13 +12,16 @@ import ProjectDossierModal from './ProjectDossierModal';
 import HelpOverlay from './HelpOverlay';
 import SkillsArchitectureOverlay from './SkillsArchitectureOverlay';
 import LeadershipEducationOverlay from './LeadershipEducationOverlay';
+import SpideyGameModal from './game/SpideyGameModal';
+import { useGame } from '../context/GameContext';
 import { setSoundEnabled, getSoundEnabled, soundEffects } from '../utils/audio';
 
 export default function TrackerFrame() {
+  const { gameState, recentUnlock } = useGame();
   const [isSoundOn, setIsSoundOn] = useState(false);
   const [confirmedActive, setConfirmedActive] = useState(true);
   const [rumoredActive, setRumoredActive] = useState(true);
-  const [activeOverlay, setActiveOverlay] = useState(null); // 'nav' | 'activity' | 'watch' | 'connect' | 'skills' | 'leadership' | 'education' | 'help'
+  const [activeOverlay, setActiveOverlay] = useState(null); // 'nav' | 'activity' | 'watch' | 'connect' | 'skills' | 'leadership' | 'education' | 'help' | 'game'
   const [selectedDossierNode, setSelectedDossierNode] = useState(null);
   const [statusToast, setStatusToast] = useState(null);
 
@@ -58,6 +61,8 @@ export default function TrackerFrame() {
   const handleSelectView = (viewId) => {
     if (viewId === 'tracker') {
       setActiveOverlay(null);
+    } else if (viewId === 'game') {
+      setActiveOverlay('game');
     } else if (viewId === 'activity' || viewId === 'projects' || viewId === 'experience') {
       setActiveOverlay('activity');
     } else if (viewId === 'watch') {
@@ -81,6 +86,24 @@ export default function TrackerFrame() {
       {/* Global Interactive Web-Shooter Click Effect */}
       <WebClickEffect />
 
+      {/* Achievement Unlock Popup */}
+      {recentUnlock && (
+        <div className="fixed top-4 right-4 z-50 bg-[#102030] border-3 border-yellow-400 rounded-xl p-3 shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
+          <span className="text-3xl">{recentUnlock.icon}</span>
+          <div>
+            <div className="text-[10px] font-pixel text-yellow-400">
+              TROPHY UNLOCKED!
+            </div>
+            <div className="text-xs font-silk font-bold text-white">
+              {recentUnlock.title}
+            </div>
+            <div className="text-[10px] font-mono text-gray-300">
+              +{recentUnlock.xpReward} XP
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ========================================================
           SLATE-BLUE RETRO MONITOR FRAME (Expanded Full Viewport)
           ======================================================== */}
@@ -90,6 +113,7 @@ export default function TrackerFrame() {
         <HangingSpiderman
           onClick={() => {
             triggerToast('🕸️ SPIDER-SENSE TINGLING!');
+            setActiveOverlay('game');
           }}
         />
 
@@ -218,6 +242,12 @@ export default function TrackerFrame() {
             onClose={() => setActiveOverlay(null)}
           />
 
+          {/* Spidey Game Modal */}
+          <SpideyGameModal
+            isOpen={activeOverlay === 'game'}
+            onClose={() => setActiveOverlay(null)}
+          />
+
           {/* Project Dossier Modal */}
           {selectedDossierNode && (
             <ProjectDossierModal
@@ -228,7 +258,14 @@ export default function TrackerFrame() {
         </div>
 
         {/* Bottom-Left Clinging Mascot */}
-        <div className="absolute -bottom-2 -left-2 z-40 pointer-events-none animate-mascot">
+        <div
+          onClick={() => {
+            soundEffects.thwip();
+            setActiveOverlay('game');
+          }}
+          title="Click to play Spidey Engineering Quest!"
+          className="absolute -bottom-2 -left-2 z-40 pointer-events-auto cursor-pointer animate-mascot hover:scale-110 transition-transform"
+        >
           <PixelMascot className="w-10 h-12 sm:w-13 sm:h-15 drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]" />
         </div>
 
@@ -237,6 +274,7 @@ export default function TrackerFrame() {
           {/* Scrolling LED dot matrix marquee */}
           <div className="flex-1 bg-[#152332] border-2 sm:border-3 border-black h-7 sm:h-8 rounded-full overflow-hidden shadow-[inset_0_2px_4px_rgba(0,0,0,0.9),0_2px_0_rgba(255,255,255,0.2)] flex items-center px-4">
             <div className="animate-marquee whitespace-nowrap text-[9px] sm:text-xs font-silk text-[#9ae6ff] tracking-widest flex items-center gap-6">
+              <span>🎮 SPIDEY QUEST: LVL {gameState.level} ({gameState.xp} XP) ■ 🪙 {gameState.coins} COINS ■ 🔥 {gameState.streak} STREAK</span>
               <span>SHARE YOUR ENGINEERING SIGHTINGS ON X ■ SIGHTING BY @SHRI_SANJAYKUMAR</span>
               <span>M.TECH INTEGRATED SE @ VIT (CGPA: 9.12 / 10.0) ■ GRADUATION 2028</span>
               <span>CAMPUSLLM: UNIVERSITY RAG ASSISTANT ACHIEVED ~3S AVERAGE LATENCY</span>
@@ -267,21 +305,27 @@ export default function TrackerFrame() {
           href={profile.resumeUrl}
           download
           onClick={() => soundEffects.click()}
-          className="px-5 sm:px-7 py-2 rounded-lg btn-arcade-yellow text-[11px] sm:text-xs font-bold tracking-wider uppercase text-center shadow-lg cursor-pointer flex-shrink-0"
+          className="px-4 sm:px-6 py-2 rounded-lg btn-arcade-yellow text-[11px] sm:text-xs font-bold tracking-wider uppercase text-center shadow-lg cursor-pointer flex-shrink-0"
         >
           WATCH RESUME / DOSSIER
         </a>
 
-        {/* Center Hero Branding & Links */}
+        {/* Center Game Quest Trigger & Branding */}
         <div className="flex flex-col items-center text-center">
           <div className="flex items-center gap-2">
             <h1 className="text-base sm:text-xl md:text-2xl font-silk font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-[#e52d27] via-[#ff6b6b] to-[#b31217] drop-shadow uppercase">
               SHRI SANJAYKUMAR V
             </h1>
             <span className="text-gray-500 hidden sm:inline">|</span>
-            <span className="text-[10px] sm:text-xs font-silk font-bold text-[#ffd277] tracking-wider hidden sm:inline">
-              M.TECH SE @ VIT (CGPA: 9.12)
-            </span>
+            <button
+              onClick={() => {
+                soundEffects.thwip();
+                setActiveOverlay('game');
+              }}
+              className="px-2.5 py-0.5 rounded bg-yellow-500/20 border border-yellow-400 text-yellow-300 text-[10px] font-silk font-bold tracking-wider hover:bg-yellow-500/30 transition-all cursor-pointer animate-pulse"
+            >
+              🎮 PLAY SPIDEY QUEST (LVL {gameState.level})
+            </button>
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-3 text-[10px] font-silk text-[#6da0c7] mt-0.5">
@@ -325,7 +369,7 @@ export default function TrackerFrame() {
             soundEffects.open();
             setActiveOverlay('connect');
           }}
-          className="px-5 sm:px-7 py-2 rounded-lg btn-arcade-yellow text-[11px] sm:text-xs font-bold tracking-wider uppercase text-center shadow-lg cursor-pointer flex-shrink-0"
+          className="px-4 sm:px-6 py-2 rounded-lg btn-arcade-yellow text-[11px] sm:text-xs font-bold tracking-wider uppercase text-center shadow-lg cursor-pointer flex-shrink-0"
         >
           GET CONNECTED / TICKETS
         </button>

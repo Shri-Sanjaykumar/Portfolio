@@ -12,6 +12,7 @@ export default function NavigationOverlay({
 
   const menuItems = [
     { id: 'tracker', label: 'MAP TRACKER' },
+    { id: 'game', label: '🎮 PLAY SPIDEY QUEST' },
     { id: 'activity', label: 'ACTIVITY LOG' },
     { id: 'projects', label: 'PROJECTS & MISSIONS' },
     { id: 'experience', label: 'EXPERIENCE (TFORCE)' },
@@ -74,13 +75,16 @@ export default function NavigationOverlay({
         <nav className="flex flex-col space-y-1.5 flex-1 justify-center py-2" aria-label="Main menu">
           {menuItems.map((item, idx) => {
             const isActive = activeView === item.id;
+            const isGame = item.id === 'game';
             return (
               <button
                 key={item.id}
                 onClick={() => handleItemClick(item.id)}
                 onMouseEnter={() => soundEffects.click()}
                 className={`text-left font-silk text-xs sm:text-sm tracking-widest py-2 px-3.5 rounded transition-all duration-150 flex items-center justify-between cursor-pointer border ${
-                  isActive
+                  isGame
+                    ? 'text-yellow-300 bg-yellow-500/20 border-yellow-400/50 font-bold hover:bg-yellow-500/30'
+                    : isActive
                     ? 'text-[#f5a742] bg-[#f5a742]/15 border-[#f5a742]/40 font-bold translate-x-1.5 shadow'
                     : 'text-[#e2f0fb] border-transparent hover:text-white hover:bg-[#20364d]/80 hover:border-[#385573] hover:translate-x-1'
                 }`}
@@ -93,6 +97,8 @@ export default function NavigationOverlay({
                 </div>
                 {isActive ? (
                   <span className="text-[#f5a742] font-mono font-bold">▶</span>
+                ) : isGame ? (
+                  <span className="text-yellow-400 font-bold text-xs animate-bounce">⚡ PLAY</span>
                 ) : (
                   <span className="text-[#4d7394] text-xs opacity-0 hover:opacity-100 transition-opacity">
                     🕸️
