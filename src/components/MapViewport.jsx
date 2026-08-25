@@ -10,7 +10,8 @@ export default function MapViewport({
   onSelectNode,
   statusToast = null,
   onTriggerToast,
-  onOpenActivityLog
+  onOpenActivityLog,
+  isIntroActive = false
 }) {
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
