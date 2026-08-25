@@ -1,156 +1,186 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { activityLog, trackerNodes } from '../data/portfolioData';
 import { soundEffects } from '../utils/audio';
 
-export default function ActivityLogOverlay({
-  isOpen = false,
-  onClose,
-  onSelectNode,
-  onSelectTab
-}) {
+const NAV_TABS = [
+  { id: 'activity',   label: 'ACTIVITY LOG' },
+  { id: 'projects',   label: 'PROJECTS & MISSIONS' },
+  { id: 'watch',      label: 'WEB WATCH 1.0' },
+  { id: 'skills',     label: 'SKILLS & ARCHITECTURE' },
+  { id: 'leadership', label: 'EVENTS & LEADERSHIP' },
+  { id: 'education',  label: 'EDUCATION (VIT)' },
+  { id: 'connect',    label: 'MESSAGE CENTER' },
+];
+
+const STATUS_COLORS = {
+  CONFIRMED:  { bg: '#2a4d38', text: '#79a86b', border: '#3a6b48', label: 'CONFIRMED'  },
+  EVENT:      { bg: '#4a3020', text: '#f5a742', border: '#6b4a28', label: 'EVENT'      },
+  EDUCATION:  { bg: '#1e3050', text: '#67c6ea', border: '#2a4870', label: 'EDUCATION'  },
+  RUMORED:    { bg: '#4a2020', text: '#e05656', border: '#6b2828', label: 'RUMORED'    },
+  EXPERIENCE: { bg: '#2a2a50', text: '#a07ef5', border: '#3a3a70', label: 'EXPERIENCE' },
+  LEADERSHIP: { bg: '#4a3a00', text: '#e8c838', border: '#6b5500', label: 'LEADERSHIP' },
+};
+
+function StatusBadge({ status }) {
+  const cfg = STATUS_COLORS[status] || STATUS_COLORS.CONFIRMED;
+  return (
+    <span
+      className="px-1.5 py-0.5 rounded text-[8px] sm:text-[9px] font-silk font-bold uppercase tracking-wider flex-shrink-0"
+      style={{ background: cfg.bg, color: cfg.text, border: `1px solid ${cfg.border}` }}
+    >
+      {cfg.label}
+    </span>
+  );
+}
+
+export default function ActivityLogOverlay({ isOpen, onClose, onSelectNode, onSelectTab }) {
+  const [activeTab, setActiveTab] = useState('activity');
+  const [hoveredRow, setHoveredRow] = useState(null);
+
   if (!isOpen) return null;
+
+  const handleTabClick = (tabId) => {
+    soundEffects.click();
+    if (tabId === 'activity') {
+      setActiveTab('activity');
+    } else {
+      if (onSelectTab) onSelectTab(tabId);
+    }
+  };
 
   const handleRowClick = (nodeId) => {
     soundEffects.select();
     const node = trackerNodes.find((n) => n.id === nodeId);
-    if (node && onSelectNode) {
-      onSelectNode(node);
-    }
+    if (node && onSelectNode) onSelectNode(node);
   };
-
-  const navTabs = [
-    { id: 'activity', label: 'ACTIVITY LOG' },
-    { id: 'projects', label: 'PROJECTS & MISSIONS' },
-    { id: 'watch', label: 'WEB WATCH 1.0' },
-    { id: 'skills', label: 'SKILLS & ARCHITECTURE' },
-    { id: 'leadership', label: 'EVENTS & LEADERSHIP' },
-    { id: 'education', label: 'EDUCATION (VIT)' },
-    { id: 'connect', label: 'MESSAGE CENTER' },
-    { id: 'help', label: 'HELP & GUIDE' },
-  ];
 
   return (
     <div
-      className="absolute inset-0 z-40 bg-[#0d1622]/95 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 select-none scanline-overlay animate-in fade-in duration-200"
+      className="absolute inset-0 z-40 flex"
+      style={{ background: 'rgba(10,18,28,0.85)', backdropFilter: 'blur(4px)' }}
       onClick={onClose}
     >
       <div
-        className="w-full max-w-5xl h-[88%] bg-[#121f2d] border-3 sm:border-4 border-black rounded-xl flex overflow-hidden shadow-2xl relative"
-        onClick={(e) => e.stopPropagation()}
+        className="w-full max-h-full flex overflow-hidden animate-dossier-reveal"
         style={{
-          boxShadow: '0 25px 60px rgba(0,0,0,0.9), inset 2px 2px 0 rgba(255,255,255,0.15)'
+          background: '#121f2d',
+          border: '3px solid #000',
+          borderRadius: '12px',
+          margin: '16px',
+          boxShadow: '0 25px 60px rgba(0,0,0,0.95), inset 2px 2px 0 rgba(255,255,255,0.08)',
         }}
+        onClick={(e) => e.stopPropagation()}
       >
-        {/* Left Sidebar matching Screenshot ezgif-frame-040 */}
-        <div className="w-48 sm:w-60 bg-[#0e1925] border-r-2 border-black p-3 sm:p-4 flex flex-col justify-between flex-shrink-0">
-          <div className="space-y-1 sm:space-y-1.5">
-            <div className="text-[10px] font-silk text-cyan-400 mb-3 px-2 tracking-widest uppercase">
+        {/* Left Sidebar — matching ezgif-frame-040 */}
+        <div
+          className="w-44 sm:w-56 flex-shrink-0 flex flex-col"
+          style={{ background: '#0e1925', borderRight: '2px solid #000' }}
+        >
+          <div className="px-4 py-3" style={{ borderBottom: '1px solid #162433' }}>
+            <div className="text-[9px] font-silk text-cyan-400 tracking-widest uppercase">
               RADAR INDEX
             </div>
-            {navTabs.map((tab) => {
-              const isActive = tab.id === 'activity';
+          </div>
+          <div className="flex-1 p-2 space-y-0.5 overflow-y-auto">
+            {NAV_TABS.map((tab) => {
+              const isCurrent = tab.id === activeTab || (tab.id !== 'activity' && false);
               return (
                 <button
                   key={tab.id}
-                  onClick={() => {
-                    soundEffects.click();
-                    if (onSelectTab) onSelectTab(tab.id);
+                  onClick={() => handleTabClick(tab.id)}
+                  className="w-full text-left text-[10px] sm:text-xs py-2 px-2.5 rounded font-silk cursor-pointer transition-all"
+                  style={{
+                    background: isCurrent ? 'rgba(245,167,66,0.12)' : 'transparent',
+                    color: isCurrent ? '#f5a742' : '#c5d8e8',
+                    borderLeft: isCurrent ? '3px solid #f5a742' : '3px solid transparent',
+                    fontWeight: isCurrent ? 'bold' : 'normal',
                   }}
-                  className={`w-full text-left font-silk text-[10px] sm:text-xs py-2 px-2.5 rounded transition-all cursor-pointer ${
-                    isActive
-                      ? 'text-[#f5a742] bg-[#f5a742]/15 border-l-3 border-[#f5a742] font-bold'
-                      : 'text-gray-300 hover:text-white hover:bg-[#1a2c3f]'
-                  }`}
                 >
                   {tab.label}
                 </button>
               );
             })}
           </div>
-
-          <div className="text-[9px] font-mono text-gray-400 border-t border-[#1e3348] pt-2 px-2">
-            SHRI SANJAYKUMAR V<br />
-            <span className="text-cyan-400">9.12 CGPA @ VIT</span>
+          <div className="p-3 text-[8px] font-mono" style={{ borderTop: '1px solid #162433' }}>
+            <div className="text-gray-400 font-bold">SHRI SANJAYKUMAR V</div>
+            <div className="text-cyan-400 mt-0.5">9.12 CGPA @ VIT</div>
           </div>
         </div>
 
-        {/* Center Main Activity Table matching ezgif-frame-040 */}
-        <div className="flex-1 flex flex-col p-4 sm:p-6 overflow-hidden bg-[#121f2d]">
-          {/* Header Bar with Close Button */}
-          <div className="flex items-center justify-between border-b-2 border-[#1e3348] pb-3 mb-3">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping" />
-              <h3 className="font-silk text-xs sm:text-sm text-cyan-300 tracking-wider uppercase font-bold">
-                GLOBAL ACTIVITY LOG // CHRONOLOGY
-              </h3>
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Header */}
+          <div
+            className="flex items-center justify-between px-4 sm:px-6 py-3"
+            style={{ borderBottom: '2px solid #162433' }}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_6px_#67e8f9]" />
+              <h2 className="text-xs sm:text-sm font-silk font-bold text-white tracking-widest uppercase">
+                ACTIVITY LOG
+              </h2>
+              <span
+                className="text-[9px] font-silk px-2 py-0.5 rounded"
+                style={{ background: '#1a2d42', color: '#67e8f9', border: '1px solid #1e3d5a' }}
+              >
+                {activityLog.length} ENTRIES
+              </span>
             </div>
-
             <button
-              onClick={() => {
-                soundEffects.close();
-                onClose();
-              }}
-              className="flex items-center gap-1 font-silk text-xs text-gray-300 hover:text-white bg-[#1e3348] hover:bg-[#2c4866] px-3 py-1 rounded border border-black cursor-pointer transition-colors"
+              onClick={() => { soundEffects.close(); onClose(); }}
+              className="flex items-center gap-1.5 text-[10px] font-silk cursor-pointer hover:text-white transition-colors px-3 py-1.5 rounded-lg"
+              style={{ color: '#8cb0cc', background: '#162433', border: '1px solid #2b4157' }}
             >
-              <span>✕</span>
-              <span>CLOSE</span>
+              ✕ CLOSE
             </button>
           </div>
 
-          {/* Chronological Activity List */}
-          <div className="flex-1 overflow-y-auto pr-1 space-y-2">
-            {activityLog.map((act) => {
-              const isConfirmed = act.badgeType === 'CONFIRMED';
-              const isEvent = act.badgeType === 'EVENT';
-              const isEducation = act.badgeType === 'EDUCATION';
-
-              return (
+          {/* Table */}
+          <div className="flex-1 overflow-y-auto">
+            {activityLog.map((entry, i) => (
+              <div
+                key={entry.id || i}
+                className="flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-3 cursor-pointer transition-all border-l-2"
+                style={{
+                  borderBottom: '1px solid #162433',
+                  background: hoveredRow === i ? 'rgba(255,255,255,0.04)' : 'transparent',
+                  borderLeftColor: hoveredRow === i ? '#f5a742' : 'transparent',
+                }}
+                onMouseEnter={() => setHoveredRow(i)}
+                onMouseLeave={() => setHoveredRow(null)}
+                onClick={() => { if (entry.nodeId) handleRowClick(entry.nodeId); }}
+                role={entry.nodeId ? 'button' : undefined}
+              >
+                {/* Status dot */}
                 <div
-                  key={act.id}
-                  onClick={() => handleRowClick(act.nodeId)}
-                  onMouseEnter={() => soundEffects.click()}
-                  className="group flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 rounded-lg bg-[#0e1925]/90 hover:bg-[#1b2f44] border border-[#1e3348] hover:border-cyan-400/60 cursor-pointer transition-all duration-150 shadow-sm"
-                >
-                  <div className="flex items-center gap-3 mb-1.5 sm:mb-0 flex-1 min-w-0">
-                    {/* Badge */}
-                    <span
-                      className={`font-silk text-[9px] px-2 py-0.5 rounded border border-black uppercase font-bold tracking-wider flex-shrink-0 ${
-                        isConfirmed
-                          ? 'bg-[#79a86b] text-black'
-                          : isEvent
-                          ? 'bg-sky-500 text-black'
-                          : isEducation
-                          ? 'bg-amber-400 text-black'
-                          : 'bg-gray-400 text-black'
-                      }`}
-                    >
-                      {act.badgeType}
-                    </span>
+                  className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full flex-shrink-0"
+                  style={{
+                    background: STATUS_COLORS[entry.badgeType]?.text || '#79a86b',
+                    boxShadow: `0 0 5px ${STATUS_COLORS[entry.badgeType]?.text || '#79a86b'}`,
+                  }}
+                />
 
-                    {/* Title */}
-                    <span className="font-silk text-xs sm:text-sm text-[#e2f0fb] group-hover:text-cyan-300 truncate font-bold">
-                      {act.title}
-                    </span>
-                  </div>
+                {/* Status badge */}
+                <StatusBadge status={entry.badgeType || 'CONFIRMED'} />
 
-                  {/* Date & Action */}
-                  <div className="flex items-center gap-3 flex-shrink-0 text-right">
-                    <span className="font-mono text-[10px] sm:text-xs text-gray-400">
-                      {act.date}
-                    </span>
-                    <span className="text-cyan-400 font-silk text-xs group-hover:translate-x-1 transition-transform">
-                      VIEW ↗
-                    </span>
+                {/* Title */}
+                <div className="flex-1 min-w-0">
+                  <div className="text-[10px] sm:text-xs font-silk text-white truncate tracking-wide">
+                    {entry.title}
                   </div>
+                  {entry.summary && (
+                    <div className="text-[8px] sm:text-[9px] font-mono text-gray-400 truncate mt-0.5">
+                      {entry.summary}
+                    </div>
+                  )}
                 </div>
-              );
-            })}
-          </div>
 
-          {/* Footer Prompt */}
-          <div className="border-t border-[#1e3348] pt-2 mt-2 flex items-center justify-between text-[10px] font-mono text-gray-400">
-            <span>CLICK ANY ENTRY TO OPEN VERIFIED DOSSIER &amp; GITHUB REPO</span>
-            <span className="text-cyan-400 font-bold">{activityLog.length} RECORDED SIGNALS</span>
+                {/* Date */}
+                <div className="text-[9px] sm:text-[10px] font-silk text-gray-400 flex-shrink-0 text-right">
+                  {entry.date}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
