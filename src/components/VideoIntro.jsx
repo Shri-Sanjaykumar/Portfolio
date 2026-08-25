@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { soundEffects } from '../utils/audio';
 
 const BOOT_LINES = [
   'INITIALIZING SANJAYKUMAR TRACKER v4.2.0...',
@@ -18,6 +19,33 @@ export default function VideoIntro({ onComplete }) {
   const [bootLines, setBootLines] = useState([]);
   const [bootDone, setBootDone] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const [videoStarted, setVideoStarted] = useState(false);
+
+  // Autoplay video with muted=true (guaranteed to never get stuck on any browser)
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.muted = true;
+      const playPromise = videoRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setVideoStarted(true);
+          })
+          .catch((err) => {
+            console.warn('Autoplay prevented, ready on gesture:', err);
+            setVideoStarted(true);
+          });
+      }
+    }
+
+    // Safety fallback: if video hasn't ended after 14 seconds, automatically advance to boot sequence
+    const safetyTimer = setTimeout(() => {
+      setPhase((p) => (p === 'video' ? 'boot' : p));
+    }, 14000);
+
+    return () => clearTimeout(safetyTimer);
+  }, []);
 
   // When video ends → go to boot phase
   const handleVideoEnd = () => {
@@ -27,38 +55,48 @@ export default function VideoIntro({ onComplete }) {
   // Run boot sequence after video ends
   useEffect(() => {
     if (phase !== 'boot') return;
+    try { soundEffects.intro?.(); } catch {}
     let i = 0;
     const iv = setInterval(() => {
       if (i < BOOT_LINES.length) {
-        setBootLines(prev => [...prev, BOOT_LINES[i]]);
+        setBootLines((prev) => [...prev, BOOT_LINES[i]]);
         i++;
       } else {
         clearInterval(iv);
         setBootDone(true);
-        // After showing all lines, fade out and call onComplete
         setTimeout(() => {
           setFadeOut(true);
           setTimeout(() => onComplete(), 700);
         }, 800);
       }
-    }, 220);
+    }, 200);
     return () => clearInterval(iv);
   }, [phase, onComplete]);
 
-  // Allow skip on click or any key
+  // Toggle audio on user click
+  const toggleAudio = (e) => {
+    e.stopPropagation();
+    if (videoRef.current) {
+      const next = !isMuted;
+      videoRef.current.muted = next;
+      setIsMuted(next);
+    }
+  };
+
+  // Skip video
   const handleSkip = () => {
     if (phase === 'video') {
       if (videoRef.current) videoRef.current.pause();
       setPhase('boot');
     } else if (phase === 'boot' && bootDone) {
       setFadeOut(true);
-      setTimeout(() => onComplete(), 400);
+      setTimeout(() => onComplete(), 300);
     }
   };
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black cursor-pointer select-none"
+      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black cursor-pointer select-none overflow-hidden"
       style={{
         opacity: fadeOut ? 0 : 1,
         transition: 'opacity 0.7s ease',
@@ -66,29 +104,61 @@ export default function VideoIntro({ onComplete }) {
       onClick={handleSkip}
     >
       {phase === 'video' && (
-        <>
+        <div className="relative w-full h-full flex items-center justify-center bg-black">
           <video
             ref={videoRef}
             src="/intro.mp4"
             autoPlay
-            muted={false}
+            muted={isMuted}
             playsInline
             onEnded={handleVideoEnd}
-            className="w-full h-full object-cover"
-            style={{ position: 'absolute', inset: 0 }}
+            className="w-full h-full object-cover sm:object-contain"
           />
-          {/* Skip hint */}
-          <div
-            className="absolute bottom-8 right-8 z-10 text-white/50 font-silk text-xs tracking-widest border border-white/20 px-3 py-1.5 rounded"
-            style={{ background: 'rgba(0,0,0,0.4)' }}
-          >
-            CLICK TO SKIP
+
+          {/* Futuristic HUD overlay on video */}
+          <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-6 sm:p-10">
+            {/* Top HUD bar */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded border border-cyan-500/40">
+                <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" />
+                <span className="font-silk text-[10px] sm:text-xs text-cyan-300 tracking-widest uppercase">
+                  CINEMATIC // RECON LOG
+                </span>
+              </div>
+
+              {/* Unmute / Audio Toggle */}
+              <button
+                onClick={toggleAudio}
+                className="pointer-events-auto bg-black/70 hover:bg-black/90 backdrop-blur-md px-3 py-1.5 rounded border border-cyan-400 font-silk text-[10px] sm:text-xs text-cyan-300 flex items-center gap-2 transition-all cursor-pointer"
+              >
+                <span>{isMuted ? '🔇 UNMUTE AUDIO' : '🔊 AUDIO ACTIVE'}</span>
+              </button>
+            </div>
+
+            {/* Bottom HUD bar */}
+            <div className="flex items-center justify-between">
+              <div className="font-mono text-[9px] sm:text-[11px] text-gray-400 bg-black/60 px-3 py-1 rounded">
+                SPIDEY TRACKER SYSTEM INITIALIZATION
+              </div>
+
+              {/* Skip Button */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSkip();
+                }}
+                className="pointer-events-auto btn-arcade-yellow px-4 sm:px-6 py-2 text-[10px] sm:text-xs font-bold rounded-lg cursor-pointer shadow-lg hover:scale-105 transition-all"
+              >
+                SKIP INTRO ⏭
+              </button>
+            </div>
           </div>
-        </>
+        </div>
       )}
 
       {phase === 'boot' && (
-        <div className="w-full h-full flex flex-col items-center justify-center bg-[#0a1422]"
+        <div
+          className="w-full h-full flex flex-col items-center justify-center bg-[#0a1422] relative"
           style={{
             background: 'radial-gradient(ellipse at center, #0d1f35 0%, #060c14 100%)',
           }}
@@ -97,23 +167,24 @@ export default function VideoIntro({ onComplete }) {
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
-              background: 'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.2) 2px,rgba(0,0,0,0.2) 4px)',
+              background:
+                'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.2) 2px,rgba(0,0,0,0.2) 4px)',
               zIndex: 1,
             }}
           />
 
           {/* Spider-Man silhouette */}
-          <div className="relative z-10 mb-8">
+          <div className="relative z-10 mb-6 animate-pulse">
             <img
               src="/spidey/spiderman-swinging.png"
               alt=""
               className="w-24 h-36 object-contain"
-              style={{ filter: 'drop-shadow(0 0 30px rgba(220,38,38,0.5))' }}
+              style={{ filter: 'drop-shadow(0 0 30px rgba(220,38,38,0.6))' }}
             />
           </div>
 
           {/* Boot log */}
-          <div className="relative z-10 w-full max-w-md px-8 text-left space-y-0.5">
+          <div className="relative z-10 w-full max-w-md px-6 text-left space-y-1">
             {bootLines.map((line, i) => (
               <div
                 key={i}
@@ -133,14 +204,14 @@ export default function VideoIntro({ onComplete }) {
           </div>
 
           {/* Progress bar */}
-          <div className="relative z-10 mt-6 w-full max-w-md px-8">
-            <div className="h-1 w-full rounded-full" style={{ background: '#0d1e2e' }}>
+          <div className="relative z-10 mt-6 w-full max-w-md px-6">
+            <div className="h-1.5 w-full rounded-full bg-[#0d1e2e] overflow-hidden">
               <div
-                className="h-full rounded-full transition-all duration-300"
+                className="h-full rounded-full transition-all duration-200"
                 style={{
                   width: `${(bootLines.length / BOOT_LINES.length) * 100}%`,
-                  background: 'linear-gradient(90deg, #1e40af, #06b6d4)',
-                  boxShadow: '0 0 8px rgba(6,182,212,0.6)',
+                  background: 'linear-gradient(90deg, #1e40af, #06b6d4, #a3e635)',
+                  boxShadow: '0 0 10px rgba(6,182,212,0.8)',
                 }}
               />
             </div>

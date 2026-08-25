@@ -1,12 +1,15 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { soundEffects } from '../utils/audio';
 
 export default function ProjectDossierModal({ node, onClose }) {
+  const [typedText, setTypedText] = useState('');
+  const [copied, setCopied] = useState(false);
+
   useEffect(() => {
-    soundEffects.open();
+    try { soundEffects.open?.(); } catch {}
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
-        soundEffects.close();
+        try { soundEffects.close?.(); } catch {}
         onClose();
       }
     };
@@ -14,7 +17,33 @@ export default function ProjectDossierModal({ node, onClose }) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
+  // Dynamic Typewriter Effect for Problem / System Overview
+  useEffect(() => {
+    if (!node) return;
+    const fullText = node.problem || node.shortDesc || '';
+    setTypedText('');
+    let idx = 0;
+    const interval = setInterval(() => {
+      if (idx < fullText.length) {
+        setTypedText((prev) => prev + fullText[idx]);
+        idx++;
+      } else {
+        clearInterval(interval);
+      }
+    }, 15);
+    return () => clearInterval(interval);
+  }, [node]);
+
   if (!node) return null;
+
+  const handleCopyLink = () => {
+    if (node.githubUrl) {
+      navigator.clipboard.writeText(node.githubUrl);
+      setCopied(true);
+      try { soundEffects.click?.(); } catch {}
+      setTimeout(() => setCopied(false), 2500);
+    }
+  };
 
   return (
     <div
@@ -22,74 +51,156 @@ export default function ProjectDossierModal({ node, onClose }) {
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-3xl bg-[#0c1622] border-3 sm:border-4 border-black rounded-xl shadow-2xl p-4 sm:p-6 md:p-8 flex flex-col gap-5 my-auto text-left max-h-[92vh] overflow-y-auto scanline-overlay"
+        className="relative w-full max-w-4xl bg-[#0a121e] border-3 sm:border-4 border-black rounded-xl shadow-2xl p-4 sm:p-6 md:p-8 flex flex-col gap-5 my-auto text-left max-h-[92vh] overflow-y-auto scanline-overlay"
         onClick={(e) => e.stopPropagation()}
         style={{
-          boxShadow: '0 20px 50px rgba(0,0,0,0.9), 0 0 20px rgba(77, 130, 164, 0.4)'
+          boxShadow: '0 25px 60px rgba(0,0,0,0.95), 0 0 35px rgba(6, 182, 212, 0.4)',
         }}
       >
-        {/* Modal Header */}
-        <div className="flex items-start justify-between border-b-2 border-black pb-4">
+        {/* Transparent Action Spider-Man Watermark in Background */}
+        <img
+          src="/spidey/spiderman-action.png"
+          alt=""
+          className="absolute -right-8 -bottom-8 w-64 h-80 object-contain opacity-10 pointer-events-none filter drop-shadow-[0_0_20px_rgba(220,38,38,0.5)]"
+        />
+
+        {/* Modal Header: Terminal / Lab Dossier Pipeline */}
+        <div className="flex items-start justify-between border-b-2 border-[#16293d] pb-4">
           <div>
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center gap-2 mb-1.5 flex-wrap">
               <span className="text-[9px] font-pixel text-cyan-400 uppercase tracking-widest px-2 py-0.5 rounded bg-black border border-cyan-500/40">
-                {node.codename || `MISSION // ${node.name.toUpperCase()}`}
+                {node.codename || `LAB // ${node.name.toUpperCase()}`}
               </span>
-              <span className={`text-[9px] font-pixel px-2 py-0.5 rounded border border-black font-bold uppercase ${
-                node.status === 'CONFIRMED' ? 'bg-[#79a86b]/30 text-[#a3d993]' : 'bg-[#5b99be]/30 text-[#8ec3e3]'
-              }`}>
+              <span
+                className={`text-[9px] font-pixel px-2 py-0.5 rounded border border-black font-bold uppercase ${
+                  node.status === 'CONFIRMED'
+                    ? 'bg-[#79a86b]/30 text-[#a3d993]'
+                    : 'bg-[#5b99be]/30 text-[#8ec3e3]'
+                }`}
+              >
                 {node.status}
+              </span>
+              <span className="text-[9px] font-mono text-amber-400 bg-amber-950/40 border border-amber-500/30 px-2 py-0.5 rounded">
+                METRICS: SHIPPED
               </span>
             </div>
 
-            <h2 className="text-base sm:text-xl md:text-2xl font-silk font-bold text-white tracking-wider">
+            <h2 className="text-base sm:text-2xl md:text-3xl font-silk font-bold text-white tracking-wider uppercase">
               {node.name}
             </h2>
 
-            <div className="text-xs font-mono text-gray-300 mt-1 flex flex-wrap gap-x-4">
+            <div className="text-xs font-mono text-gray-300 mt-1 flex flex-wrap gap-x-4 gap-y-1">
               <span>📍 {node.region}</span>
               <span>📅 {node.date || node.year}</span>
+              <span className="text-cyan-400">⚡ LAB RECON VALIDATED</span>
             </div>
           </div>
 
           <button
             onClick={() => {
-              soundEffects.close();
+              try { soundEffects.close?.(); } catch {}
               onClose();
             }}
-            className="w-8 h-8 rounded border-2 border-black bg-[#1f3144] hover:bg-[#324d6b] text-white flex items-center justify-center font-silk text-sm cursor-pointer shadow"
+            className="w-8 h-8 rounded border-2 border-black bg-[#1f3144] hover:bg-[#324d6b] text-white flex items-center justify-center font-silk text-sm cursor-pointer shadow transition-all hover:scale-105"
           >
             ✕
           </button>
         </div>
 
-        {/* Project AI Preview Banner Image */}
-        {node.thumbnail && (
-          <div className="w-full h-44 sm:h-56 md:h-64 rounded-lg overflow-hidden border-2 border-black bg-black relative shadow-inner flex-shrink-0">
-            <img
-              src={node.thumbnail}
-              alt={node.name}
-              className="w-full h-full object-cover"
-              onError={(e) => { e.target.style.display = 'none'; }}
-            />
-            <div className="absolute bottom-2 left-2 px-2.5 py-1 rounded bg-black/80 border border-cyan-400 font-silk text-[10px] text-cyan-300 uppercase tracking-wider">
-              {node.category}
+        {/* Main 2-Column Split: Image / Lab Specs Left + Dynamic Terminal Right */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* Left Column: Image Banner + Tech Specs */}
+          <div className="space-y-4">
+            {node.thumbnail && (
+              <div className="w-full h-44 sm:h-52 rounded-lg overflow-hidden border-2 border-[#1e3d5a] bg-black relative shadow-inner">
+                <img
+                  src={node.thumbnail}
+                  alt={node.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => { e.target.style.display = 'none'; }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent" />
+                <div className="absolute bottom-2 left-2 px-2.5 py-1 rounded bg-black/80 border border-cyan-400 font-silk text-[10px] text-cyan-300 uppercase tracking-wider">
+                  {node.category}
+                </div>
+              </div>
+            )}
+
+            {/* Tech Stack Chips */}
+            <div>
+              <div className="text-[10px] font-silk text-cyan-400 uppercase tracking-wider mb-2">
+                SYSTEM ARSENAL &amp; DEPENDENCIES
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {node.tech?.map((t) => (
+                  <span
+                    key={t}
+                    className="px-2 py-1 bg-[#122132] border border-[#223d59] text-cyan-300 text-[10px] font-mono rounded hover:bg-[#1a334e] transition-colors"
+                  >
+                    {t}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
-        )}
 
-        {/* Action Buttons: GitHub Repo & Demo Links */}
-        <div className="flex flex-wrap items-center gap-3">
+          {/* Right Column: Dynamic Terminal Typewriter & Architecture Breakdown */}
+          <div className="space-y-4 flex flex-col justify-between">
+            {/* Dynamic Typewriter Terminal Box */}
+            <div className="bg-[#060c14] border border-[#1b354d] p-3.5 rounded-lg font-mono text-xs text-green-400 shadow-inner min-h-[110px] relative">
+              <div className="flex items-center justify-between pb-1.5 mb-2 border-b border-[#13283a] text-[9px] text-[#4d7394]">
+                <span>TERMINAL://LOG.STREAM</span>
+                <span className="text-cyan-400 animate-pulse">● LIVE</span>
+              </div>
+              <p className="leading-relaxed whitespace-pre-wrap">
+                {typedText}
+                <span className="animate-cursor text-cyan-400 ml-1">█</span>
+              </p>
+            </div>
+
+            {/* System Solution / Architecture Highlights */}
+            {node.solution && (
+              <div className="bg-[#0e1926] border border-[#1e344a] p-3.5 rounded-lg">
+                <div className="text-[10px] font-silk text-amber-400 uppercase tracking-wider mb-1.5">
+                  ARCHITECTURE &amp; RESOLUTION
+                </div>
+                <p className="text-xs font-mono text-gray-300 leading-relaxed">
+                  {node.solution}
+                </p>
+              </div>
+            )}
+
+            {/* Key Engineering Deliverables */}
+            {node.highlights && (
+              <div className="space-y-1.5">
+                <div className="text-[10px] font-silk text-cyan-400 uppercase tracking-wider">
+                  SYSTEM HIGHLIGHTS
+                </div>
+                <ul className="space-y-1">
+                  {node.highlights.map((h, i) => (
+                    <li key={i} className="flex items-start gap-2 text-[11px] font-mono text-gray-300">
+                      <span className="text-cyan-400 font-bold">▸</span>
+                      <span>{h}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Action Buttons: GitHub Repo, Live Demo & Copy */}
+        <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-[#16293d]">
           {node.githubUrl && (
             <a
               href={node.githubUrl}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={() => soundEffects.click()}
-              className="px-4 py-2 rounded-lg border-2 border-black bg-[#24292e] hover:bg-[#2f363d] text-white font-silk text-xs font-bold tracking-wider flex items-center gap-2 shadow transition-transform active:scale-95 cursor-pointer"
+              onClick={() => { try { soundEffects.click?.(); } catch {} }}
+              className="btn-arcade-yellow px-5 py-2 text-xs font-bold tracking-wider flex items-center gap-2 rounded-lg cursor-pointer"
             >
-              <span>🔗 GITHUB REPOSITORY</span>
-              <span className="text-cyan-400 text-[10px]">↗</span>
+              <span>🔗 VIEW GITHUB REPO</span>
+              <span className="text-[10px]">↗</span>
             </a>
           )}
           {node.demoUrl && (
@@ -97,129 +208,18 @@ export default function ProjectDossierModal({ node, onClose }) {
               href={node.demoUrl}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={() => soundEffects.click()}
-              className="px-4 py-2 rounded-lg border-2 border-black bg-[#e8a838] hover:bg-[#ffd277] text-black font-silk text-xs font-bold tracking-wider flex items-center gap-2 shadow transition-transform active:scale-95 cursor-pointer"
+              onClick={() => { try { soundEffects.click?.(); } catch {} }}
+              className="px-4 py-2 rounded-lg border-2 border-black bg-[#1f3144] hover:bg-[#324d6b] text-cyan-300 font-silk text-xs font-bold tracking-wider flex items-center gap-2 shadow transition-all cursor-pointer"
             >
-              <span>🚀 VIEW PROJECT / PROFILE</span>
-              <span className="text-black text-[10px]">↗</span>
+              <span>🌐 LIVE TARGET DEMO</span>
+              <span className="text-[10px]">↗</span>
             </a>
           )}
-        </div>
-
-        {/* Confidentiality Notice if applicable */}
-        {node.confidential && (
-          <div className="p-3 bg-amber-950/40 border border-amber-500/40 rounded-lg flex items-start gap-2.5 text-xs font-mono text-amber-200">
-            <span className="text-amber-400 font-bold">⚠️</span>
-            <span>{node.confidentialNote}</span>
-          </div>
-        )}
-
-        {/* Problem Statement */}
-        {node.problem && (
-          <div className="space-y-1.5">
-            <div className="text-[10px] font-silk text-cyan-400 uppercase tracking-widest">
-              [ 01 // PROBLEM STATEMENT ]
-            </div>
-            <p className="text-xs md:text-sm font-mono text-gray-200 leading-relaxed bg-[#111f2e] p-3.5 rounded-lg border border-[#1d334a]">
-              {node.problem}
-            </p>
-          </div>
-        )}
-
-        {/* Technical Solution */}
-        {node.solution && (
-          <div className="space-y-1.5">
-            <div className="text-[10px] font-silk text-cyan-400 uppercase tracking-widest">
-              [ 02 // TECHNICAL APPROACH &amp; SOLUTION ]
-            </div>
-            <p className="text-xs md:text-sm font-mono text-gray-200 leading-relaxed bg-[#111f2e] p-3.5 rounded-lg border border-[#1d334a]">
-              {node.solution}
-            </p>
-          </div>
-        )}
-
-        {/* Architecture Flow */}
-        {node.architecture && (
-          <div className="space-y-2">
-            <div className="text-[10px] font-silk text-cyan-400 uppercase tracking-widest">
-              [ 03 // ARCHITECTURE PIPELINE ]
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
-              {node.architecture.map((arch) => (
-                <div key={arch.step} className="bg-[#101c29] border border-[#20364c] p-3 rounded-lg flex flex-col justify-between shadow-sm">
-                  <div className="flex items-center justify-between text-cyan-400 font-pixel text-[9px] mb-1">
-                    <span>STEP {arch.step}</span>
-                  </div>
-                  <div className="font-silk text-xs font-bold text-white mb-1">
-                    {arch.title}
-                  </div>
-                  <div className="text-[11px] font-mono text-gray-300 leading-tight">
-                    {arch.desc}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Engineering Highlights */}
-        {node.highlights && (
-          <div className="space-y-2">
-            <div className="text-[10px] font-silk text-cyan-400 uppercase tracking-widest">
-              [ 04 // ENGINEERING HIGHLIGHTS ]
-            </div>
-            <ul className="space-y-2 bg-[#111f2e] p-3.5 rounded-lg border border-[#1d334a]">
-              {node.highlights.map((item, idx) => (
-                <li key={idx} className="flex items-start gap-2 text-xs font-mono text-gray-200">
-                  <span className="text-cyan-400 font-bold mt-0.5">■</span>
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {/* Measurable Results */}
-        {node.result && (
-          <div className="p-3.5 bg-[#79a86b]/15 border border-[#79a86b]/40 rounded-lg flex items-center justify-between">
-            <span className="text-[10px] font-silk text-[#9dd48d] uppercase tracking-widest">
-              MEASURABLE OUTCOME:
-            </span>
-            <span className="text-xs font-mono font-bold text-white">
-              {node.result}
-            </span>
-          </div>
-        )}
-
-        {/* Tech Stack Badges */}
-        {node.tech && (
-          <div className="space-y-2">
-            <div className="text-[10px] font-silk text-cyan-400 uppercase tracking-widest">
-              [ 05 // TECHNOLOGIES &amp; TOOLS ]
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {node.tech.map((tool) => (
-                <span
-                  key={tool}
-                  className="px-2.5 py-1 rounded bg-[#162536] border border-[#274059] text-gray-100 text-xs font-mono"
-                >
-                  {tool}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Footer Close Button */}
-        <div className="pt-3 border-t border-[#1b2d40] flex justify-end">
           <button
-            onClick={() => {
-              soundEffects.close();
-              onClose();
-            }}
-            className="px-6 py-2 rounded-lg border-2 border-black bg-[#e8a838] hover:bg-[#ffd277] text-black font-silk text-xs font-bold uppercase tracking-wider transition-colors shadow cursor-pointer"
+            onClick={handleCopyLink}
+            className="px-4 py-2 rounded-lg border-2 border-black bg-[#132230] hover:bg-[#1f3448] text-gray-300 font-silk text-xs tracking-wider flex items-center gap-1.5 transition-all cursor-pointer ml-auto"
           >
-            CLOSE DOSSIER
+            {copied ? '✓ COPIED!' : '📋 COPY REPO LINK'}
           </button>
         </div>
       </div>

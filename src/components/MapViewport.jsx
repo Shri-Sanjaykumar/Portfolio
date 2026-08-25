@@ -18,6 +18,17 @@ export default function MapViewport({
   const markersRef = useRef([]);
   const [selectedPopupNode, setSelectedPopupNode] = useState(null);
   const [isGlobalView, setIsGlobalView] = useState(true);
+  const [showSignalBanner, setShowSignalBanner] = useState(true);
+
+  // Auto-dismiss the yellow 11 Active Signals banner 4.5s after intro completes
+  useEffect(() => {
+    if (!isIntroActive) {
+      const timer = setTimeout(() => {
+        setShowSignalBanner(false);
+      }, 4500);
+      return () => clearTimeout(timer);
+    }
+  }, [isIntroActive]);
 
   // Helper to create HTML string for marker icons
   const createMarkerHtml = (node) => {
@@ -84,7 +95,6 @@ export default function MapViewport({
         maxZoom: 19,
       }).addTo(map);
 
-      // Invalidate size on mount and window resize so tiles fill instantly
       const handleResize = () => {
         if (mapInstanceRef.current) {
           mapInstanceRef.current.invalidateSize();
@@ -145,7 +155,7 @@ export default function MapViewport({
         const marker = leafletObj.marker([node.lat, node.lng], { icon: customIcon }).addTo(map);
 
         marker.on('click', () => {
-          soundEffects.marker();
+          try { soundEffects.marker?.(); } catch {}
           setSelectedPopupNode(node);
         });
 
@@ -158,9 +168,9 @@ export default function MapViewport({
 
   // Global View Reset
   const handleGlobalView = () => {
-    soundEffects.click();
+    try { soundEffects.click?.(); } catch {}
     setIsGlobalView(true);
-    if (onTriggerToast) onTriggerToast('centering to global view');
+    if (onTriggerToast) onTriggerToast('CENTERING: GLOBAL RECON VIEW');
     if (mapInstanceRef.current) {
       mapInstanceRef.current.flyTo([20, 10], 2.2, { duration: 1.5 });
     }
@@ -168,9 +178,9 @@ export default function MapViewport({
 
   // Center on Neighborhood (VIT Vellore Hub)
   const handleCenterNeighborhood = () => {
-    soundEffects.select();
+    try { soundEffects.select?.(); } catch {}
     setIsGlobalView(false);
-    if (onTriggerToast) onTriggerToast('centering to your neighborhood');
+    if (onTriggerToast) onTriggerToast('CENTERING: VIT VELLORE HUB');
     if (mapInstanceRef.current) {
       mapInstanceRef.current.flyTo([12.9692, 79.1559], 13, { duration: 1.8 });
     }
@@ -178,7 +188,7 @@ export default function MapViewport({
 
   return (
     <div className="relative w-full h-full bg-[#0a111a] select-none overflow-hidden">
-      {/* Top Coordinate Rulers (Matching Reference Screenshot) */}
+      {/* Top Coordinate Rulers */}
       <div className="absolute top-0 inset-x-0 h-4 bg-[#0a111a]/95 border-b border-[#1b2b3d] z-20 flex items-center justify-between px-3 text-[8px] font-mono text-[#4d7394] pointer-events-none">
         {['180°W', '120°W', '60°W', '0°', '60°E', '120°E', '180°E'].map((coord, i) => (
           <span key={i} className="flex flex-col items-center">
@@ -198,39 +208,70 @@ export default function MapViewport({
         ))}
       </div>
 
-      {/* Floating Center Notification Card (Matching Screenshot media_1787520704200.png) */}
-      <div className="absolute top-7 left-1/2 -translate-x-1/2 z-20 pointer-events-auto">
-        <div 
-          onClick={onOpenActivityLog}
-          className="bg-[#f0ad38] border-2 sm:border-3 border-black rounded-lg px-4 sm:px-6 py-1.5 sm:py-2 shadow-[0_4px_0_#000] flex flex-col items-center cursor-pointer hover:bg-[#ffc355] transition-transform active:scale-95 group"
-        >
-          <div className="flex items-center gap-2 text-[9px] sm:text-[10px] font-pixel text-black font-bold">
-            <span>00:00</span>
-            <div className="w-5 h-5 rounded-full bg-red-600 border border-black flex items-center justify-center">
-              <div className="w-3 h-3 bg-white rounded-full" />
+      {/* Floating Center Notification Banner - Auto disappears after intro */}
+      {showSignalBanner ? (
+        <div className="absolute top-7 left-1/2 -translate-x-1/2 z-20 pointer-events-auto transition-all duration-500 animate-in fade-in slide-in-from-top-4">
+          <div 
+            onClick={() => {
+              if (onOpenActivityLog) onOpenActivityLog();
+            }}
+            className="relative bg-[#f0ad38] border-2 sm:border-3 border-black rounded-lg px-4 sm:px-6 py-1.5 sm:py-2 shadow-[0_4px_0_#000] flex flex-col items-center cursor-pointer hover:bg-[#ffc355] transition-transform active:scale-95 group"
+          >
+            {/* Perched Spider-Man on top */}
+            <img
+              src="/spidey/spiderman-crouch.png"
+              alt=""
+              className="absolute -top-7 left-1/2 -translate-x-1/2 w-9 h-9 object-contain pointer-events-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
+            />
+            <div className="flex items-center gap-2 text-[9px] sm:text-[10px] font-pixel text-black font-bold">
+              <span>00:00</span>
+              <div className="w-4 h-4 rounded-full bg-red-600 border border-black flex items-center justify-center animate-pulse">
+                <div className="w-2 h-2 bg-white rounded-full" />
+              </div>
+              <span>00:00</span>
             </div>
-            <span>00:00</span>
-          </div>
-          <div className="text-[10px] sm:text-xs font-silk font-bold text-black uppercase tracking-wider mt-0.5 whitespace-nowrap">
-            {trackerNodes.length} ACTIVE ENGINEERING SIGNALS
+            <div className="text-[10px] sm:text-xs font-silk font-bold text-black uppercase tracking-wider mt-0.5 whitespace-nowrap">
+              {trackerNodes.length} ACTIVE ENGINEERING SIGNALS
+            </div>
+
+            {/* Dismiss Button */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowSignalBanner(false);
+              }}
+              className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-black text-white text-[9px] font-bold border border-white/40 flex items-center justify-center hover:bg-red-700 transition-colors"
+              title="Dismiss banner"
+            >
+              ✕
+            </button>
           </div>
         </div>
-      </div>
+      ) : (
+        /* Re-open Signal Pill */
+        <button
+          onClick={() => setShowSignalBanner(true)}
+          className="absolute top-6 left-1/2 -translate-x-1/2 z-20 bg-black/80 hover:bg-black text-[#f0ad38] border border-[#f0ad38]/50 px-3 py-1 rounded-full text-[9px] font-silk flex items-center gap-1.5 shadow-md cursor-pointer transition-all hover:scale-105"
+        >
+          <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+          <span>{trackerNodes.length} SIGNALS</span>
+        </button>
+      )}
 
       {/* Leaflet Map Canvas */}
       <div ref={mapContainerRef} className="w-full h-full z-0 cursor-crosshair" />
 
-      {/* Floating Dossier Preview Popup */}
+      {/* Floating Dossier Preview Popup when clicking node on map */}
       {selectedPopupNode && (
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 w-72 sm:w-80 bg-[#101822] border-3 border-black rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_20px_rgba(77,130,164,0.5)] p-3 flex flex-col gap-2.5 animate-in fade-in zoom-in-95 duration-150">
-          <div className="relative w-full h-28 rounded overflow-hidden border border-[#2b4157] bg-black">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 w-72 sm:w-80 bg-[#101822] border-3 border-black rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_25px_rgba(6,182,212,0.4)] p-3 flex flex-col gap-2.5 animate-in fade-in zoom-in-95 duration-150">
+          <div className="relative w-full h-32 rounded overflow-hidden border border-[#2b4157] bg-black">
             <img
               src={selectedPopupNode.thumbnail}
               alt={selectedPopupNode.name}
               className="w-full h-full object-cover object-top opacity-90"
               onError={(e) => { e.target.style.display = 'none'; }}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-transparent" />
             <button
               onClick={() => setSelectedPopupNode(null)}
               className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-black/80 border border-white/20 text-white flex items-center justify-center text-xs hover:bg-red-900 transition-colors cursor-pointer"
@@ -253,25 +294,25 @@ export default function MapViewport({
 
           <button
             onClick={() => {
-              soundEffects.select();
-              onSelectNode(selectedPopupNode);
+              try { soundEffects.select?.(); } catch {}
+              if (onSelectNode) onSelectNode(selectedPopupNode);
               setSelectedPopupNode(null);
             }}
-            className="w-full py-2 rounded border-2 border-black bg-[#e8a838] hover:bg-[#ffd277] text-black font-silk text-xs font-bold uppercase tracking-wider transition-colors shadow-[0_3px_0_#000] active:translate-y-0.5 active:shadow-none cursor-pointer"
+            className="btn-arcade-yellow w-full py-2 text-xs font-bold uppercase tracking-wider rounded cursor-pointer"
           >
-            VIEW EVENT / PROJECT
+            VIEW EVENT / PROJECT ⚡
           </button>
         </div>
       )}
 
       {/* Floating Status Notification Toast */}
       {statusToast && (
-        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-40 bg-black/95 border-2 border-[#4d82a4] px-5 py-2 rounded shadow-2xl text-xs font-silk text-cyan-300 uppercase tracking-widest pointer-events-none">
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-40 bg-black/95 border-2 border-[#4d82a4] px-5 py-2 rounded shadow-2xl text-xs font-silk text-cyan-300 uppercase tracking-widest pointer-events-none animate-float-up">
           {statusToast}
         </div>
       )}
 
-      {/* Radar Scanner Widget (Bottom-Right) */}
+      {/* 3D Animated Radar Scanner Widget (Bottom-Right) */}
       <div className="absolute bottom-2 right-2 z-20 pointer-events-auto">
         <PixelRadarWidget
           isGlobal={isGlobalView}
@@ -281,7 +322,7 @@ export default function MapViewport({
       </div>
 
       {/* Retro Scanline Overlay */}
-      <div className="absolute inset-0 scanline-overlay pointer-events-none z-10 opacity-25" />
+      <div className="absolute inset-0 scanline-overlay pointer-events-none z-10 opacity-20" />
     </div>
   );
 }

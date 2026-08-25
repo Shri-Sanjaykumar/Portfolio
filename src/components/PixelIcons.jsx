@@ -101,65 +101,39 @@ export const PixelStarMarker = ({ size = 32, isHovered = false, isSelected = fal
       <rect x="6" y="3" width="10" height="2" fill="#8ec3e3" />
       <rect x="3" y="5" width="2" height="10" fill="#8ec3e3" />
 
-      <rect x="11" y="6" width="2" height="12" fill="#000" />
-      <rect x="6" y="11" width="12" height="2" fill="#000" />
-      <rect x="8" y="8" width="8" height="8" fill="#000" />
-      <rect x="10" y="7" width="4" height="10" fill="#000" />
-      <rect x="7" y="10" width="10" height="4" fill="#000" />
+      <polygon points="12,7 13.5,10.5 17,11 14.5,13.5 15,17 12,15 9,17 9.5,13.5 7,11 10.5,10.5" fill="#000" />
     </svg>
   </div>
 );
 
-// Pixel Mascot (Hanging / Clinging Coder Mascot)
-export const PixelMascot = ({ className = "w-12 h-14" }) => (
-  <div className={`relative flex items-center justify-center ${className}`}>
-    <img
-      src="/spidey/spiderman-face-transparent.png"
-      alt="Spider Mascot"
-      className="w-full h-full object-contain filter drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)]"
-      onError={(e) => {
-        e.target.style.display = 'none';
-        if (e.target.nextSibling) e.target.nextSibling.style.display = 'block';
+// 3D Motion-Enhanced Holographic Radar Widget for Bottom Right
+export const PixelRadarWidget = ({ onGlobalClick, onCenterClick, isGlobal = false }) => (
+  <div 
+    className="relative w-28 h-28 flex items-center justify-center select-none group transition-transform duration-300 hover:scale-105"
+    style={{
+      perspective: '600px',
+      transformStyle: 'preserve-3d',
+    }}
+  >
+    {/* Outer 3D Glow Ring */}
+    <div
+      className="absolute inset-0 rounded-full border border-cyan-500/30 animate-pulse pointer-events-none"
+      style={{
+        boxShadow: '0 0 25px rgba(6,182,212,0.35), inset 0 0 15px rgba(6,182,212,0.2)',
+        transform: 'rotateX(15deg)',
       }}
     />
-    <svg viewBox="0 0 32 36" className="hidden w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="10" y="2" width="12" height="2" fill="#000" />
-      <rect x="8" y="4" width="16" height="2" fill="#000" />
-      <rect x="6" y="6" width="20" height="10" fill="#000" />
-      <rect x="8" y="16" width="16" height="2" fill="#000" />
-      <rect x="10" y="4" width="12" height="12" fill="#e03b3b" />
-      <rect x="8" y="6" width="16" height="8" fill="#e03b3b" />
-      <polygon points="9,8 13,8 14,12 10,12" fill="#ffffff" />
-      <polygon points="19,8 23,8 22,12 18,12" fill="#ffffff" />
-    </svg>
-  </div>
-);
 
-// Pixel Audio / Speaker Icon
-export const PixelSpeaker = ({ isOn = false, className = "w-5 h-5" }) => (
-  <svg viewBox="0 0 20 20" className={className} fill="currentColor">
-    <rect x="3" y="7" width="4" height="6" />
-    <polygon points="7,7 12,3 12,17 7,13" />
-    {isOn ? (
-      <>
-        <rect x="14" y="6" width="1.5" height="8" />
-        <rect x="17" y="4" width="1.5" height="12" />
-      </>
-    ) : (
-      <>
-        <polygon points="14,8 15,7 18,10 17,11" />
-        <polygon points="18,8 17,7 14,10 15,11" />
-      </>
-    )}
-  </svg>
-);
-
-// Pixel Radar Widget SVG for Bottom Right
-export const PixelRadarWidget = ({ onGlobalClick, onCenterClick, isGlobal = false }) => (
-  <div className="relative w-28 h-28 flex items-center justify-center select-none">
-    <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-lg">
-      <circle cx="50" cy="50" r="46" fill="#0c1622" stroke="#253a4f" strokeWidth="2" />
+    <svg 
+      viewBox="0 0 100 100" 
+      className="w-full h-full drop-shadow-2xl"
+      style={{
+        transform: 'rotateX(12deg) rotateY(-8deg)',
+      }}
+    >
+      <circle cx="50" cy="50" r="46" fill="#08101a" stroke="#1e3d5a" strokeWidth="2.5" />
       
+      {/* Spiderweb Polar Grid Lines */}
       {[0, 30, 60, 90, 120, 150].map((deg) => (
         <line
           key={deg}
@@ -167,7 +141,7 @@ export const PixelRadarWidget = ({ onGlobalClick, onCenterClick, isGlobal = fals
           y1="50"
           x2={50 + 44 * Math.cos((deg * Math.PI) / 180)}
           y2={50 + 44 * Math.sin((deg * Math.PI) / 180)}
-          stroke="#1e3348"
+          stroke="#162e45"
           strokeWidth="1"
           strokeDasharray="2,2"
         />
@@ -179,34 +153,40 @@ export const PixelRadarWidget = ({ onGlobalClick, onCenterClick, isGlobal = fals
           y1="50"
           x2={50 + 44 * Math.cos((deg * Math.PI) / 180)}
           y2={50 + 44 * Math.sin((deg * Math.PI) / 180)}
-          stroke="#1e3348"
+          stroke="#162e45"
           strokeWidth="1"
           strokeDasharray="2,2"
         />
       ))}
 
-      <circle cx="50" cy="50" r="14" fill="none" stroke="#2b4764" strokeWidth="1" />
-      <circle cx="50" cy="50" r="28" fill="none" stroke="#2b4764" strokeWidth="1" />
-      <circle cx="50" cy="50" r="42" fill="none" stroke="#3b5d80" strokeWidth="1.5" />
+      {/* Concentric Web Rings */}
+      <circle cx="50" cy="50" r="14" fill="none" stroke="#1c3a57" strokeWidth="1" />
+      <circle cx="50" cy="50" r="28" fill="none" stroke="#1c3a57" strokeWidth="1" />
+      <circle cx="50" cy="50" r="42" fill="none" stroke="#254e75" strokeWidth="1.5" />
 
-      <circle cx="68" cy="45" r="2.5" fill="#79a86b" className="animate-ping" />
-      <circle cx="68" cy="45" r="2" fill="#a3d993" />
-      <circle cx="32" cy="38" r="2" fill="#d94b4b" />
-      <circle cx="58" cy="65" r="2" fill="#8ec3e3" />
+      {/* Active 3D Blip Signals with Pulsing Beacons */}
+      <circle cx="68" cy="45" r="3" fill="#79a86b" className="animate-ping" />
+      <circle cx="68" cy="45" r="2.5" fill="#a3d993" />
+      <circle cx="32" cy="38" r="2.5" fill="#ef4444" className="animate-ping" />
+      <circle cx="32" cy="38" r="2" fill="#f87171" />
+      <circle cx="58" cy="65" r="2.5" fill="#38bdf8" />
+      <circle cx="42" cy="55" r="2" fill="#a855f7" />
 
+      {/* Rotating 3D Holographic Sweep */}
       <g className="animate-radar-sweep origin-center">
         <path
           d="M50,50 L92,50 A42,42 0 0,0 50,8 Z"
-          fill="url(#radar-glow)"
-          opacity="0.65"
+          fill="url(#radar-glow-3d)"
+          opacity="0.8"
         />
-        <line x1="50" y1="50" x2="92" y2="50" stroke="#7bb0d4" strokeWidth="1.5" />
+        <line x1="50" y1="50" x2="92" y2="50" stroke="#38bdf8" strokeWidth="2" strokeLinecap="round" />
       </g>
 
       <defs>
-        <radialGradient id="radar-glow" cx="50" cy="50" r="42" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#4d82a4" stopOpacity="0.1" />
-          <stop offset="100%" stopColor="#8ec3e3" stopOpacity="0.5" />
+        <radialGradient id="radar-glow-3d" cx="50" cy="50" r="42" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#0284c7" stopOpacity="0.05" />
+          <stop offset="70%" stopColor="#38bdf8" stopOpacity="0.3" />
+          <stop offset="100%" stopColor="#00ff88" stopOpacity="0.6" />
         </radialGradient>
       </defs>
     </svg>
@@ -217,7 +197,7 @@ export const PixelRadarWidget = ({ onGlobalClick, onCenterClick, isGlobal = fals
         onClick={onGlobalClick}
         title="Global Map View"
         className={`w-6 h-6 rounded-full border border-black flex items-center justify-center shadow-md transition-all cursor-pointer ${
-          isGlobal ? 'bg-[#7bb0d4] text-black' : 'bg-[#1b2b3a] text-cyan-300 hover:bg-[#2c445c]'
+          isGlobal ? 'bg-[#7bb0d4] text-black font-bold' : 'bg-[#1b2b3a] text-cyan-300 hover:bg-[#2c445c]'
         }`}
       >
         <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2">
@@ -228,10 +208,10 @@ export const PixelRadarWidget = ({ onGlobalClick, onCenterClick, isGlobal = fals
         </svg>
       </button>
 
-      {/* Center Map Target Bullseye Button (Matching Reference Screenshot) */}
+      {/* Center Map Target Bullseye Button */}
       <button
         onClick={onCenterClick}
-        title="Center Map on Neighborhood / VIT Vellore"
+        title="Center Map on Neighborhood / VIT Vellore Hub"
         className="w-6 h-6 rounded-full border border-black bg-[#1b2b3a] hover:bg-[#2c445c] text-cyan-300 flex items-center justify-center shadow-md transition-all cursor-pointer"
       >
         <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2">
