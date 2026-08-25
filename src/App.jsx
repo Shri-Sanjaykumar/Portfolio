@@ -33,7 +33,7 @@ class ErrorBoundary extends React.Component {
 }
 
 export default function App() {
-  // Show video intro on true fresh load (not on HMR reload)
+  // Show video intro on fresh load
   const [showVideoIntro, setShowVideoIntro] = useState(() => {
     try {
       return sessionStorage.getItem('portfolio_intro_done') !== 'yes';
@@ -47,6 +47,10 @@ export default function App() {
     setShowVideoIntro(false);
   };
 
+  const handleReplayIntro = () => {
+    setShowVideoIntro(true);
+  };
+
   return (
     <ErrorBoundary>
       {showVideoIntro && <VideoIntro onComplete={handleIntroComplete} />}
@@ -54,7 +58,7 @@ export default function App() {
         className="w-full h-full"
         style={{ visibility: showVideoIntro ? 'hidden' : 'visible' }}
       >
-        <TrackerFrame />
+        <TrackerFrame onReplayIntro={handleReplayIntro} />
       </div>
     </ErrorBoundary>
   );

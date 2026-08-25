@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { profile } from '../data/portfolioData';
+import { profile, trackerNodes } from '../data/portfolioData';
 import MapViewport from './MapViewport';
 import IntroScreen from './IntroScreen';
 import WebClickEffect from './WebClickEffect';
 import { setSoundEnabled, soundEffects } from '../utils/audio';
 
-// ─── Lazy-load overlays ──────────────────────────────────────────────────────
+// ─── Overlays ────────────────────────────────────────────────────────────────
 import NavigationOverlay from './NavigationOverlay';
 import ActivityLogOverlay from './ActivityLogOverlay';
 import ProjectsOverlay from './ProjectsOverlay';
@@ -16,23 +16,21 @@ import AboutMeOverlay from './AboutMeOverlay';
 import ProjectDossierModal from './ProjectDossierModal';
 import HelpOverlay from './HelpOverlay';
 
-// ─── Pixel Spider icon (exactly like spideytracker.net markers) ──────────────
+// ─── Pixel Spider icon (spideytracker.net filter buttons) ────────────────────
 function PixelSpiderIcon({ color = 'green', size = 22 }) {
   const fill = color === 'green' ? '#79a86b' : color === 'red' ? '#cc3333' : '#e6e6e6';
   const bg   = color === 'green' ? '#2d5c30' : color === 'red' ? '#5c1a1a' : '#3a3a3a';
   return (
     <svg viewBox="0 0 24 24" width={size} height={size} xmlns="http://www.w3.org/2000/svg">
       <circle cx="12" cy="12" r="10" fill={bg} stroke="#000" strokeWidth="1.5"/>
-      {/* Spider body */}
       <ellipse cx="12" cy="13" rx="3.5" ry="4.5" fill={fill}/>
-      <ellipse cx="12" cy="9" rx="2.5" ry="2.5" fill={fill}/>
-      {/* Legs */}
-      <line x1="8.5" y1="11" x2="4" y2="9"   stroke={fill} strokeWidth="1.2" strokeLinecap="round"/>
+      <circle cx="12" cy="8.5" r="2.5" fill={fill}/>
+      <line x1="8.5" y1="11" x2="4" y2="9" stroke={fill} strokeWidth="1.2" strokeLinecap="round"/>
       <line x1="8.5" y1="13" x2="3.5" y2="13" stroke={fill} strokeWidth="1.2" strokeLinecap="round"/>
-      <line x1="8.5" y1="15" x2="4" y2="17"   stroke={fill} strokeWidth="1.2" strokeLinecap="round"/>
-      <line x1="15.5" y1="11" x2="20" y2="9"   stroke={fill} strokeWidth="1.2" strokeLinecap="round"/>
+      <line x1="8.5" y1="15" x2="4" y2="17" stroke={fill} strokeWidth="1.2" strokeLinecap="round"/>
+      <line x1="15.5" y1="11" x2="20" y2="9" stroke={fill} strokeWidth="1.2" strokeLinecap="round"/>
       <line x1="15.5" y1="13" x2="20.5" y2="13" stroke={fill} strokeWidth="1.2" strokeLinecap="round"/>
-      <line x1="15.5" y1="15" x2="20" y2="17"  stroke={fill} strokeWidth="1.2" strokeLinecap="round"/>
+      <line x1="15.5" y1="15" x2="20" y2="17" stroke={fill} strokeWidth="1.2" strokeLinecap="round"/>
     </svg>
   );
 }
@@ -53,31 +51,24 @@ function SpideyEyesMask() {
 
 // ─── Pixel mascot (bottom-left, walking Spider-Man) ──────────────────────────
 function PixelMascot({ frame = 0 }) {
-  // Two-frame walk animation
   return (
     <svg viewBox="0 0 32 48" width="36" height="54" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      {/* Head */}
       <rect x="10" y="1" width="12" height="10" rx="2" fill="#dc2626"/>
       <rect x="8"  y="3" width="2"  height="7"  fill="#dc2626"/>
       <rect x="22" y="3" width="2"  height="7"  fill="#dc2626"/>
-      {/* Eyes */}
       <rect x="11" y="3" width="4"  height="4"  rx="1" fill="white"/>
       <rect x="17" y="3" width="4"  height="4"  rx="1" fill="white"/>
       <rect x="12" y="4" width="2"  height="2"  fill="#1e40af"/>
       <rect x="18" y="4" width="2"  height="2"  fill="#1e40af"/>
-      {/* Body */}
       <rect x="9"  y="11" width="14" height="13" fill="#dc2626"/>
       <rect x="7"  y="13" width="2"  height="8"  fill="#dc2626"/>
       <rect x="23" y="13" width="2"  height="8"  fill="#dc2626"/>
-      {/* Spider logo */}
       <rect x="13" y="15" width="6"  height="1"  fill="white" opacity="0.9"/>
       <rect x="15" y="13" width="2"  height="5"  fill="white" opacity="0.9"/>
-      {/* Legs - alternate by frame */}
       <rect x="11" y="24" width="4"  height="13" fill="#1e3a8a"/>
       <rect x="17" y="24" width="4"  height="13" fill="#1e3a8a"/>
       <rect x={frame === 0 ? 9  : 10} y="34" width="2"  height="5" fill="#1e3a8a"/>
       <rect x={frame === 0 ? 21 : 20} y="34" width="2"  height="5" fill="#1e3a8a"/>
-      {/* Feet */}
       <rect x={frame === 0 ? 7  : 8}  y="38" width="4"  height="2" fill="#dc2626"/>
       <rect x={frame === 0 ? 21 : 20} y="38" width="4"  height="2" fill="#dc2626"/>
     </svg>
@@ -118,13 +109,11 @@ function RadarWidget() {
           boxShadow: 'inset 0 0 10px rgba(0,0,0,0.8)',
         }}
       >
-        {/* Web lines */}
         {[0,30,60,90,120,150].map(a => (
           <div key={a} className="absolute inset-0 flex items-center justify-center" style={{ transform: `rotate(${a}deg)` }}>
             <div className="w-full h-px" style={{ background: 'rgba(30,61,90,0.7)' }}/>
           </div>
         ))}
-        {/* Rings */}
         {[50,34,18].map(p => (
           <div key={p} className="absolute rounded-full border" style={{
             width:`${p}px`,height:`${p}px`,
@@ -133,7 +122,6 @@ function RadarWidget() {
             borderColor:'rgba(30,61,90,0.7)',
           }}/>
         ))}
-        {/* Sweep */}
         <div className="absolute inset-0 flex items-center justify-center animate-radar-sweep">
           <div className="absolute right-1/2 w-[35%] h-0.5 origin-right"
             style={{
@@ -142,21 +130,14 @@ function RadarWidget() {
             }}
           />
         </div>
-        {/* Dot */}
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-1.5 h-1.5 rounded-full" style={{ background:'#00ff88', boxShadow:'0 0 5px #00ff88' }}/>
         </div>
-        {/* Ping dot */}
-        <div className="absolute" style={{ top:'25%',left:'60%',width:4,height:4 }}>
-          <div className="w-full h-full rounded-full" style={{ background:'#00ff88', boxShadow:'0 0 3px #00ff88' }}/>
-        </div>
       </div>
-      {/* Globe icon below radar */}
       <svg viewBox="0 0 20 20" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
         <circle cx="10" cy="10" r="8" fill="none" stroke="#1e4d6b" strokeWidth="1.2"/>
         <ellipse cx="10" cy="10" rx="4" ry="8" fill="none" stroke="#1e4d6b" strokeWidth="1"/>
         <line x1="2" y1="10" x2="18" y2="10" stroke="#1e4d6b" strokeWidth="1"/>
-        <line x1="10" y1="2" x2="10" y2="18" stroke="#1e4d6b" strokeWidth="0.5" opacity="0.4"/>
       </svg>
     </div>
   );
@@ -192,71 +173,6 @@ function RulerLeft() {
   );
 }
 
-// ─── Web-click pulse ─────────────────────────────────────────────────────────
-function WebPulseEffect({ x, y, id, onDone }) {
-  useEffect(() => {
-    const t = setTimeout(onDone, 700);
-    return () => clearTimeout(t);
-  }, [onDone]);
-  return (
-    <div className="fixed z-[200] pointer-events-none" style={{ left: x, top: y }}>
-      {[1,1.5,2,2.5].map((scale, i) => (
-        <div key={i} className="absolute rounded-full border border-white/60"
-          style={{
-            width: 24 * scale, height: 24 * scale,
-            top: '50%', left: '50%',
-            transform: 'translate(-50%,-50%)',
-            animation: `webRing 0.6s ${i * 0.08}s ease-out forwards`,
-          }}
-        />
-      ))}
-      {/* Center web icon */}
-      <div className="absolute" style={{ top:'50%',left:'50%',transform:'translate(-50%,-50%)' }}>
-        <svg viewBox="0 0 30 30" width="30" height="30" className="animate-web-expand">
-          {[0,45,90,135].map(a => (
-            <line key={a} x1="15" y1="15"
-              x2={15 + 13 * Math.cos(a * Math.PI/180)}
-              y2={15 + 13 * Math.sin(a * Math.PI/180)}
-              stroke="white" strokeWidth="1" opacity="0.7"
-            />
-          ))}
-          {[4,8,12].map(r => (
-            <circle key={r} cx="15" cy="15" r={r} fill="none" stroke="white" strokeWidth="0.6" opacity="0.5"/>
-          ))}
-        </svg>
-      </div>
-    </div>
-  );
-}
-
-// ─── Global web-click effect tracker ──────────────────────────────────────────
-function GlobalWebClickEffect() {
-  const [effects, setEffects] = useState([]);
-  useEffect(() => {
-    const handler = (e) => {
-      const id = Date.now();
-      setEffects(prev => [...prev, { id, x: e.clientX, y: e.clientY }]);
-    };
-    window.addEventListener('click', handler);
-    return () => window.removeEventListener('click', handler);
-  }, []);
-  return (
-    <>
-      <style>{`
-        @keyframes webRing {
-          0%   { opacity:0.9; transform:translate(-50%,-50%) scale(0.3); }
-          100% { opacity:0;   transform:translate(-50%,-50%) scale(1);   }
-        }
-      `}</style>
-      {effects.map(e => (
-        <WebPulseEffect key={e.id} x={e.x} y={e.y} id={e.id}
-          onDone={() => setEffects(prev => prev.filter(p => p.id !== e.id))}
-        />
-      ))}
-    </>
-  );
-}
-
 // ─── Toast notification ──────────────────────────────────────────────────────
 function Toast({ message, id }) {
   return (
@@ -286,7 +202,7 @@ const TICKER = [
 ];
 
 // ─── MAIN TRACKER FRAME ───────────────────────────────────────────────────────
-export default function TrackerFrame() {
+export default function TrackerFrame({ onReplayIntro }) {
   const [showIntro, setShowIntro] = useState(() => {
     try { return sessionStorage.getItem('tracker_sound_set') !== 'yes'; }
     catch { return true; }
@@ -380,7 +296,7 @@ export default function TrackerFrame() {
     <div className="h-screen w-full bg-[#0a121d] flex flex-col select-none overflow-hidden"
       style={{ padding: '8px 8px 6px 8px' }}
     >
-      <GlobalWebClickEffect />
+      <WebClickEffect />
 
       {/* ════════════════════════════════════════════════════════
           RETRO MONITOR — exact spideytracker.net blue frame
@@ -429,13 +345,11 @@ export default function TrackerFrame() {
           aria-expanded={activeOverlay === 'nav'}
         >
           {activeOverlay === 'nav' ? (
-            /* X icon when open — exactly like spideytracker.net */
             <svg viewBox="0 0 20 20" width="20" height="20">
               <line x1="4" y1="4" x2="16" y2="16" stroke="#dc2626" strokeWidth="3" strokeLinecap="round"/>
               <line x1="16" y1="4" x2="4"  y2="16" stroke="#dc2626" strokeWidth="3" strokeLinecap="round"/>
             </svg>
           ) : (
-            /* Spidey eye mask */
             <svg viewBox="0 0 28 18" width="26" height="16">
               <ellipse cx="8"  cy="9" rx="6.5" ry="7.5" fill="#dc2626" stroke="#000" strokeWidth="0.8"/>
               <ellipse cx="20" cy="9" rx="6.5" ry="7.5" fill="#dc2626" stroke="#000" strokeWidth="0.8"/>
@@ -483,7 +397,6 @@ export default function TrackerFrame() {
           title="Connect / Message Center"
         >
           <svg viewBox="0 0 24 24" width="22" height="22" xmlns="http://www.w3.org/2000/svg">
-            {/* Spider icon - black on white like the original */}
             <ellipse cx="12" cy="14" rx="4" ry="5" fill="#111"/>
             <circle  cx="12" cy="8"  r="3.5"       fill="#111"/>
             <line x1="7"  y1="12" x2="2"  y2="9"  stroke="#111" strokeWidth="1.3"/>
@@ -675,7 +588,7 @@ export default function TrackerFrame() {
         {/* Left: Watch Resume */}
         <a
           href="/Shri_Sanjaykumar_V_Resume.pdf"
-          download
+          download="Shri_Sanjaykumar_V_Resume.pdf"
           onClick={() => { try { soundEffects.click?.(); } catch {} }}
           className="btn-arcade-yellow px-4 sm:px-6 py-2 text-[10px] sm:text-xs font-bold tracking-wider uppercase rounded-lg cursor-pointer flex-shrink-0"
           style={{ minWidth: 140 }}
@@ -707,6 +620,12 @@ export default function TrackerFrame() {
             <span>·</span>
             <button onClick={() => openOverlay('activity')} className="hover:text-white transition-colors cursor-pointer">ACTIVITY LOG</button>
             <span>·</span>
+            {onReplayIntro && (
+              <>
+                <button onClick={onReplayIntro} className="hover:text-white transition-colors cursor-pointer text-cyan-300">REPLAY INTRO ▶</button>
+                <span>·</span>
+              </>
+            )}
             <button onClick={() => { try { sessionStorage.removeItem('tracker_sound_set'); } catch {}; setShowIntro(true); }} className="hover:text-white transition-colors cursor-pointer">CREDITS ▲</button>
           </div>
         </div>
