@@ -1,207 +1,158 @@
 @import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
 
 @theme {
-  --font-pixel: 'Press Start 2P', monospace;
-  --font-silkscreen: 'Silkscreen', monospace;
-  --font-vt323: 'VT323', monospace;
-  --font-dot: 'DotGothic16', sans-serif;
+  --font-silk: 'Silkscreen', cursive, sans-serif;
+  --font-pixel: 'Press Start 2P', monospace, cursive;
   --font-mono: 'JetBrains Mono', monospace;
   --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 @layer utilities {
+  .font-silk {
+    font-family: 'Silkscreen', cursive, sans-serif;
+  }
+  .font-pixel {
+    font-family: 'Press Start 2P', monospace, cursive;
+  }
+  .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-  
-  .font-pixel {
-    font-family: var(--font-pixel);
-  }
-  .font-silk {
-    font-family: var(--font-silkscreen);
-  }
-  .font-vt {
-    font-family: var(--font-vt323);
-  }
-  .font-dot {
-    font-family: var(--font-dot);
-  }
-
-  /* Pixel Border Utility */
-  .pixel-border-sm {
-    box-shadow: 
-      -2px 0 0 0 #000,
-      2px 0 0 0 #000,
-      0 -2px 0 0 #000,
-      0 2px 0 0 #000;
-  }
-  
-  .pixel-border-md {
-    box-shadow: 
-      -3px 0 0 0 #000,
-      3px 0 0 0 #000,
-      0 -3px 0 0 #000,
-      0 3px 0 0 #000;
-  }
-
-  /* Arcade Yellow Button */
-  .btn-arcade-yellow {
-    background: #e8a838;
-    color: #000;
-    border: 3px solid #000;
-    box-shadow: inset 2px 2px 0px #ffd277, inset -2px -2px 0px #b0781a, 0 4px 0 #000;
-    font-family: var(--font-silkscreen);
-    transition: all 0.08s ease;
-  }
-  .btn-arcade-yellow:hover {
-    background: #f5b94e;
-    transform: translateY(1px);
-    box-shadow: inset 2px 2px 0px #ffe199, inset -2px -2px 0px #c48820, 0 3px 0 #000;
-  }
-  .btn-arcade-yellow:active {
-    transform: translateY(4px);
-    box-shadow: inset 2px 2px 0px #b0781a, inset -2px -2px 0px #ffd277, 0 0 0 #000;
-  }
-
-  /* Arcade Green Button (Sound / Confirm) */
-  .btn-arcade-green {
-    background: #79a86b;
-    color: #000;
-    border: 3px solid #000;
-    box-shadow: inset 2px 2px 0px #9dd48d, inset -2px -2px 0px #537d47, 0 3px 0 #000;
-    transition: all 0.08s ease;
-  }
-  .btn-arcade-green:hover {
-    background: #88be79;
-    transform: translateY(1px);
-    box-shadow: inset 2px 2px 0px #b4ebb4, inset -2px -2px 0px #5c8b50, 0 2px 0 #000;
-  }
-  .btn-arcade-green:active {
-    transform: translateY(3px);
-    box-shadow: inset 2px 2px 0px #537d47, inset -2px -2px 0px #9dd48d, 0 0 0 #000;
-  }
-
-  /* Arcade Dark Bezel Button */
-  .btn-arcade-dark {
-    background: #1b242e;
-    color: #e2f0fb;
-    border: 2px solid #000;
-    box-shadow: inset 1px 1px 0px #314254, inset -1px -1px 0px #0e141a;
-  }
-  .btn-arcade-dark:hover {
-    background: #253342;
-    color: #fff;
-  }
-
-  /* Web Expand Animation (THWIP Click Effect) */
-  @keyframes webExpand {
-    0% {
-      transform: translate(-50%, -50%) scale(0.2) rotate(0deg);
-      opacity: 1;
-    }
-    50% {
-      transform: translate(-50%, -50%) scale(1.1) rotate(12deg);
-      opacity: 0.95;
-    }
-    100% {
-      transform: translate(-50%, -50%) scale(1.4) rotate(24deg);
-      opacity: 0;
-    }
-  }
-
-  .animate-web-expand {
-    animation: webExpand 0.55s ease-out forwards;
-  }
-
-  /* Radar Sweep Animation */
-  @keyframes radar-sweep {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
-  .animate-radar-sweep {
-    animation: radar-sweep 4s linear infinite;
-    transform-origin: center center;
-  }
 
   /* Ticker Marquee Animation */
-  @keyframes marquee {
+  @keyframes marqueeLoop {
     0% { transform: translateX(0%); }
-    100% { transform: translateX(-50%); }
+    100% { transform: translateX(-33.333%); }
   }
 
   .animate-marquee {
     display: flex;
     width: max-content;
-    animation: marquee 28s linear infinite;
+    animation: marqueeLoop 34s linear infinite;
   }
   .animate-marquee:hover {
     animation-play-state: paused;
   }
 
-  /* Mascot Swing Animation */
-  @keyframes swing {
-    0%, 100% { transform: rotate(-6deg); }
-    50% { transform: rotate(6deg); }
+  /* Radar Sweep Animation */
+  @keyframes radarRotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }
+
+  .animate-radar-sweep {
+    animation: radarRotate 4s linear infinite;
+  }
+
+  /* Hanging Spiderman Pendulum Swing */
+  @keyframes pendulumSwing {
+    0% { transform: rotate(-5deg); }
+    50% { transform: rotate(5deg); }
+    100% { transform: rotate(-5deg); }
+  }
+
   .animate-swing {
+    animation: pendulumSwing 4s ease-in-out infinite;
     transform-origin: top center;
-    animation: swing 3.5s ease-in-out infinite;
   }
 
-  /* Mascot Bounce Animation */
-  @keyframes mascot-bounce {
-    0%, 100% { transform: translateY(0) scale(1); }
-    50% { transform: translateY(-4px) scale(1.03); }
+  /* Mascot Idle Breathing / Bob */
+  @keyframes mascotBreathing {
+    0%, 100% { transform: translateY(0px) scale(1); }
+    50% { transform: translateY(-3px) scale(1.02); }
   }
+
   .animate-mascot {
-    animation: mascot-bounce 2s ease-in-out infinite;
+    animation: mascotBreathing 2.5s ease-in-out infinite;
   }
 
-  /* Pulse Glow */
-  @keyframes marker-pulse {
-    0% { transform: scale(1); opacity: 0.9; }
-    50% { transform: scale(1.35); opacity: 0.3; }
-    100% { transform: scale(1.6); opacity: 0; }
+  /* Marker Pulse Animation */
+  @keyframes markerPulseWave {
+    0% { transform: scale(1); opacity: 0.8; }
+    100% { transform: scale(2.2); opacity: 0; }
   }
+
   .animate-marker-pulse {
-    animation: marker-pulse 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
+    animation: markerPulseWave 2s cubic-bezier(0, 0, 0.2, 1) infinite;
   }
 
-  /* Scanline effect */
-  .scanline-overlay {
-    background: linear-gradient(
-      rgba(18, 16, 16, 0) 50%, 
-      rgba(0, 0, 0, 0.25) 50%
-    ), linear-gradient(
-      90deg,
-      rgba(255, 0, 0, 0.03),
-      rgba(0, 255, 0, 0.01),
-      rgba(0, 255, 0, 0.03)
-    );
-    background-size: 100% 3px, 6px 100%;
-    pointer-events: none;
+  /* Web Click Blast Animation */
+  @keyframes webExpandEffect {
+    0% { transform: translate(-50%, -50%) scale(0.2); opacity: 1; }
+    70% { transform: translate(-50%, -50%) scale(1.3); opacity: 0.8; }
+    100% { transform: translate(-50%, -50%) scale(1.6); opacity: 0; }
+  }
+
+  .animate-web-expand {
+    animation: webExpandEffect 0.55s ease-out forwards;
   }
 }
 
-/* Custom Scrollbar for Retro HUD */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+/* Custom Arcade Button Styles (Yellow Beveled) */
+.btn-arcade-yellow {
+  background: linear-gradient(180deg, #ffd466 0%, #e8a838 100%);
+  color: #000;
+  border: 3px solid #000;
+  box-shadow: inset 1px 1px 0 rgba(255,255,255,0.6), inset -1px -1px 0 rgba(0,0,0,0.3), 0 4px 0 #000;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+  font-family: 'Silkscreen', cursive, sans-serif;
+  transition: transform 0.1s, box-shadow 0.1s;
 }
-::-webkit-scrollbar-track {
-  background: #0f1620;
-  border: 1px solid #1a2738;
+.btn-arcade-yellow:hover {
+  background: linear-gradient(180deg, #ffe082 0%, #f5b041 100%);
+  transform: translateY(-1px);
+  box-shadow: inset 1px 1px 0 rgba(255,255,255,0.7), inset -1px -1px 0 rgba(0,0,0,0.3), 0 5px 0 #000;
 }
-::-webkit-scrollbar-thumb {
-  background: #4d82a4;
-  border-radius: 0px;
+.btn-arcade-yellow:active {
+  transform: translateY(3px);
+  box-shadow: inset 1px 1px 0 rgba(0,0,0,0.4), 0 1px 0 #000;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: #6ea4c8;
+
+/* Custom Arcade Button Styles (Green Sound) */
+.btn-arcade-green {
+  background: linear-gradient(180deg, #9dd48d 0%, #79a86b 100%);
+  border: 2px solid #000;
+  box-shadow: inset 1px 1px 0 rgba(255,255,255,0.6), inset -1px -1px 0 rgba(0,0,0,0.3), 0 3px 0 #000;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+.btn-arcade-green:hover {
+  background: linear-gradient(180deg, #b5e4a7 0%, #8bbd7d 100%);
+  transform: translateY(-1px);
+}
+.btn-arcade-green:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #000;
+}
+
+/* Subtle CRT Scanline Overlay */
+.scanline-overlay {
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.25) 50%
+  ), linear-gradient(
+    90deg,
+    rgba(255, 0, 0, 0.03),
+    rgba(0, 255, 0, 0.01),
+    rgba(0, 255, 0, 0.03)
+  );
+  background-size: 100% 3px, 6px 100%;
+  pointer-events: none;
+}
+
+/* Leaflet Dark Map Tweaks */
+.leaflet-container {
+  background: #0a111a !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.custom-pixel-marker {
+  background: transparent !important;
+  border: none !important;
 }
 
 /* Base Body Styles */
@@ -210,13 +161,21 @@ html, body {
   padding: 0;
   background-color: #0a121d;
   color: #fff;
-  min-height: 100vh;
+  height: 100%;
   width: 100%;
   overflow-x: hidden;
+  font-family: 'Inter', sans-serif;
+}
+
+#root {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Focus styles for accessibility */
 :focus-visible {
-  outline: 2px solid #ffd277;
+  outline: 2px solid #00e5ff;
   outline-offset: 2px;
 }

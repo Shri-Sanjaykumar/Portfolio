@@ -101,7 +101,7 @@ export default function TrackerFrame() {
       {/* ========================================================
           SLATE-BLUE RETRO MONITOR FRAME (Expanded Full Viewport)
           ======================================================== */}
-      <div className="relative w-full max-w-[1540px] mx-auto flex-1 min-h-0 bg-[#5695bc] rounded-2xl md:rounded-3xl border-4 md:border-[6px] border-black p-2.5 sm:p-3.5 md:p-4 shadow-[0_20px_50px_rgba(0,0,0,0.8),inset_2px_2px_0_rgba(255,255,255,0.4),inset_-2px_-2px_0_rgba(0,0,0,0.4)] flex flex-col justify-between">
+      <div className="relative w-full max-w-[1540px] mx-auto flex-1 min-h-[500px] bg-[#5695bc] rounded-2xl md:rounded-3xl border-4 md:border-[6px] border-black p-2.5 sm:p-3.5 md:p-4 shadow-[0_20px_50px_rgba(0,0,0,0.8),inset_2px_2px_0_rgba(255,255,255,0.4),inset_-2px_-2px_0_rgba(0,0,0,0.4)] flex flex-col justify-between">
         
         {/* Hanging Upside-Down Spider-Man on Web String (Large & Prominent) */}
         <HangingSpiderman
@@ -184,7 +184,7 @@ export default function TrackerFrame() {
         </div>
 
         {/* Inner Viewport Screen (Real Tactical Map) */}
-        <div className="relative flex-1 w-full rounded-xl overflow-hidden border-2 sm:border-3 border-black shadow-[inset_0_4px_12px_rgba(0,0,0,0.8)] bg-[#0a111a] mt-7 sm:mt-8 mb-7 sm:mb-8 min-h-0">
+        <div className="relative flex-1 w-full min-h-[380px] rounded-xl overflow-hidden border-2 sm:border-3 border-black shadow-[inset_0_4px_12px_rgba(0,0,0,0.8)] bg-[#0a111a] mt-7 sm:mt-8 mb-7 sm:mb-8">
           
           {/* Tactical Real Map */}
           <MapViewport
