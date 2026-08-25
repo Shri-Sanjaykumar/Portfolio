@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { engineeringWatchItems } from '../data/portfolioData';
+import { PixelSpiderMask } from './PixelIcons';
 import { soundEffects } from '../utils/audio';
 
 export default function EngineeringWatchOverlay({ isOpen = false, onClose }) {
@@ -9,129 +10,147 @@ export default function EngineeringWatchOverlay({ isOpen = false, onClose }) {
 
   const currentItem = engineeringWatchItems[currentIndex];
 
-  const handlePrev = () => {
-    soundEffects.click();
-    setCurrentIndex((prev) => (prev > 0 ? prev - 1 : engineeringWatchItems.length - 1));
+  const handleNext = () => {
+    soundEffects.select();
+    setCurrentIndex((prev) => (prev + 1) % engineeringWatchItems.length);
   };
 
-  const handleNext = () => {
-    soundEffects.click();
-    setCurrentIndex((prev) => (prev < engineeringWatchItems.length - 1 ? prev + 1 : 0));
+  const handlePrev = () => {
+    soundEffects.select();
+    setCurrentIndex((prev) => (prev - 1 + engineeringWatchItems.length) % engineeringWatchItems.length);
   };
 
   return (
-    <div className="absolute inset-0 z-40 bg-[#0d1622]/95 backdrop-blur-md flex flex-col p-4 md:p-8 select-none overflow-hidden scanline-overlay">
-      {/* Top Header */}
-      <div className="flex items-center justify-between border-b-2 border-black bg-[#101b29] p-4 rounded-t-lg">
-        <div className="flex items-center gap-3">
-          <div className="w-3 h-3 bg-amber-400 border border-black" />
-          <h2 className="text-xs md:text-sm font-silk font-bold text-white tracking-widest uppercase">
-            {currentItem.edition}
-          </h2>
+    <div
+      className="absolute inset-0 z-40 bg-[#0d1622]/95 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 select-none scanline-overlay animate-in fade-in duration-200"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-4xl h-[90%] bg-[#121f2d] border-3 sm:border-4 border-black rounded-xl p-4 sm:p-6 flex flex-col justify-between shadow-2xl relative overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          boxShadow: '0 25px 60px rgba(0,0,0,0.9), inset 2px 2px 0 rgba(255,255,255,0.15)'
+        }}
+      >
+        {/* Background Decorative Logo */}
+        <div className="absolute -right-8 -top-8 opacity-10 pointer-events-none w-56 h-56">
+          <PixelSpiderMask className="w-full h-full" />
         </div>
 
-        <button
-          onClick={() => {
-            soundEffects.close();
-            onClose();
-          }}
-          className="flex items-center gap-1.5 px-3 py-1 rounded border border-black bg-[#1f3144] hover:bg-[#324d6b] text-white font-silk text-xs uppercase"
-        >
-          <span>✕</span>
-          <span>CLOSE</span>
-        </button>
-      </div>
+        {/* Top Header */}
+        <div className="flex items-center justify-between border-b-2 border-[#1e3348] pb-3 mb-3">
+          <div className="flex items-center gap-2.5">
+            <span className="px-2 py-0.5 rounded bg-cyan-400 text-black font-silk text-[10px] font-bold uppercase tracking-wider">
+              {currentItem.edition}
+            </span>
+            <h3 className="font-silk text-xs sm:text-sm text-cyan-300 tracking-wider uppercase font-bold">
+              WEB WATCH // ENGINEERING DOSSIER
+            </h3>
+          </div>
 
-      {/* Main Carousel Card Body (Matching Screenshot 6) */}
-      <div className="flex-1 bg-[#0b131e] border-x-2 border-b-2 border-black p-4 md:p-8 flex flex-col lg:flex-row items-center justify-between gap-8 overflow-y-auto">
-        {/* Left Arrow Button */}
-        <button
-          onClick={handlePrev}
-          className="hidden md:flex w-10 h-10 rounded border-2 border-black bg-[#1b2b3a] hover:bg-cyan-500 hover:text-black text-cyan-300 items-center justify-center font-silk text-sm font-bold shadow-lg transition-all"
-          aria-label="Previous slide"
-        >
-          ◀
-        </button>
+          <button
+            onClick={() => {
+              soundEffects.close();
+              onClose();
+            }}
+            className="flex items-center gap-1 font-silk text-xs text-gray-300 hover:text-white bg-[#1e3348] hover:bg-[#2c4866] px-3 py-1 rounded border border-black cursor-pointer transition-colors"
+          >
+            <span>✕</span>
+            <span>CLOSE</span>
+          </button>
+        </div>
 
-        {/* Center Content Card */}
-        <div className="flex-1 max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 items-center">
-          {/* Card Image */}
-          <div className="relative aspect-[4/3] rounded-lg overflow-hidden border-2 border-black bg-black shadow-xl">
+        {/* Carousel Content (3D perspective and slide transition) */}
+        <div className="flex-1 flex flex-col md:flex-row gap-5 overflow-y-auto items-center py-2">
+          {/* Project Preview Image */}
+          <div className="w-full md:w-1/2 h-52 sm:h-64 rounded-lg overflow-hidden border-2 border-black bg-black relative shadow-lg flex-shrink-0 group">
             <img
               src={currentItem.image}
               alt={currentItem.title}
-              className="w-full h-full object-cover object-top"
-              onError={(e) => { e.target.style.display = 'none'; }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-            <div className="absolute bottom-3 left-3">
-              <span className="text-[9px] font-pixel text-cyan-300 uppercase px-2 py-1 bg-black/80 border border-cyan-500/30 rounded">
-                {currentItem.badge}
-              </span>
-            </div>
-          </div>
-
-          {/* Card Text & Details */}
-          <div className="flex flex-col justify-center space-y-4">
-            <div>
-              <span className="text-[10px] font-silk text-[#6991b5] uppercase tracking-widest">
-                {currentItem.subtitle}
-              </span>
-              <h3 className="text-lg md:text-xl font-silk font-bold text-white tracking-wider mt-1">
-                {currentItem.title}
-              </h3>
-            </div>
-
-            <p className="text-xs md:text-sm font-mono text-gray-300 leading-relaxed">
-              {currentItem.desc}
-            </p>
-
-            {/* Bullet Highlights */}
-            <ul className="space-y-2 pt-2 border-t border-[#1e3042]">
-              {currentItem.bulletPoints.map((pt, i) => (
-                <li key={i} className="flex items-start gap-2.5 text-xs font-mono text-cyan-300/90">
-                  <span className="text-cyan-400 font-bold mt-0.5">■</span>
-                  <span>{pt}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        {/* Right Arrow Button */}
-        <button
-          onClick={handleNext}
-          className="hidden md:flex w-10 h-10 rounded border-2 border-black bg-[#1b2b3a] hover:bg-cyan-500 hover:text-black text-cyan-300 items-center justify-center font-silk text-sm font-bold shadow-lg transition-all"
-          aria-label="Next slide"
-        >
-          ▶
-        </button>
-      </div>
-
-      {/* Bottom Carousel Indicator Dots & Mobile Nav */}
-      <div className="flex items-center justify-between p-3 bg-[#0d1622] border-x-2 border-b-2 border-black rounded-b-lg">
-        <button onClick={handlePrev} className="md:hidden px-3 py-1 bg-[#1b2b3a] text-cyan-300 rounded font-silk text-xs">
-          ◀ PREV
-        </button>
-
-        <div className="flex items-center gap-2 mx-auto">
-          {engineeringWatchItems.map((_, idx) => (
-            <button
-              key={idx}
-              onClick={() => {
-                soundEffects.click();
-                setCurrentIndex(idx);
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              onError={(e) => {
+                e.target.src = '/images/photo.jpeg';
               }}
-              className={`w-3 h-2 border border-black transition-all ${
-                currentIndex === idx ? 'bg-cyan-400 w-6' : 'bg-[#22364a] hover:bg-[#34516d]'
-              }`}
             />
-          ))}
+            <div className="absolute top-2 left-2 px-2 py-0.5 rounded bg-black/80 border border-cyan-400/60 font-silk text-[9px] text-cyan-300 uppercase tracking-wider">
+              {currentItem.badge}
+            </div>
+          </div>
+
+          {/* Project Details */}
+          <div className="w-full md:w-1/2 flex flex-col justify-between space-y-3">
+            <div>
+              <h2 className="font-silk text-sm sm:text-base text-white tracking-wide font-bold">
+                {currentItem.title}
+              </h2>
+              <p className="font-mono text-xs text-cyan-300 font-semibold mt-1">
+                {currentItem.subtitle}
+              </p>
+              <p className="font-mono text-xs text-gray-300 mt-2.5 leading-relaxed">
+                {currentItem.desc}
+              </p>
+
+              {/* Bullet Points */}
+              <div className="mt-3 space-y-1.5">
+                {currentItem.bulletPoints.map((pt, i) => (
+                  <div key={i} className="flex items-start gap-2 text-[11px] font-mono text-gray-300">
+                    <span className="text-cyan-400 font-bold">▶</span>
+                    <span>{pt}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Direct GitHub Link */}
+            <div className="pt-2">
+              <a
+                href={currentItem.githubUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => soundEffects.click()}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#e8a838] hover:bg-[#ffd277] text-black font-silk text-xs font-bold uppercase tracking-wider border-2 border-black shadow-[0_3px_0_#000] active:translate-y-1 transition-all"
+              >
+                <span>OPEN GITHUB REPO</span>
+                <span>↗</span>
+              </a>
+            </div>
+          </div>
         </div>
 
-        <button onClick={handleNext} className="md:hidden px-3 py-1 bg-[#1b2b3a] text-cyan-300 rounded font-silk text-xs">
-          NEXT ▶
-        </button>
+        {/* Carousel Controls & Pagination Dots */}
+        <div className="border-t border-[#1e3348] pt-3 mt-2 flex items-center justify-between">
+          <button
+            onClick={handlePrev}
+            className="px-3 sm:px-4 py-1.5 rounded bg-[#1e3348] hover:bg-[#2c4866] text-white font-silk text-xs border border-black cursor-pointer shadow transition-colors"
+          >
+            ◀ PREV
+          </button>
+
+          {/* Dots */}
+          <div className="flex items-center gap-2">
+            {engineeringWatchItems.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => {
+                  soundEffects.select();
+                  setCurrentIndex(i);
+                }}
+                className={`w-2.5 h-2.5 rounded-full transition-all cursor-pointer ${
+                  i === currentIndex
+                    ? 'bg-cyan-400 w-6'
+                    : 'bg-gray-600 hover:bg-gray-400'
+                }`}
+              />
+            ))}
+          </div>
+
+          <button
+            onClick={handleNext}
+            className="px-3 sm:px-4 py-1.5 rounded bg-[#1e3348] hover:bg-[#2c4866] text-white font-silk text-xs border border-black cursor-pointer shadow transition-colors"
+          >
+            NEXT ▶
+          </button>
+        </div>
       </div>
     </div>
   );

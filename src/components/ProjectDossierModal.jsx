@@ -18,11 +18,11 @@ export default function ProjectDossierModal({ node, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 md:p-8 select-none overflow-y-auto"
+      className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 md:p-8 select-none overflow-y-auto"
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-3xl bg-[#0c1622] border-3 border-black rounded-lg shadow-2xl p-5 md:p-8 flex flex-col gap-5 my-auto text-left max-h-[90vh] overflow-y-auto scanline-overlay"
+        className="relative w-full max-w-3xl bg-[#0c1622] border-3 sm:border-4 border-black rounded-xl shadow-2xl p-4 sm:p-6 md:p-8 flex flex-col gap-5 my-auto text-left max-h-[92vh] overflow-y-auto scanline-overlay"
         onClick={(e) => e.stopPropagation()}
         style={{
           boxShadow: '0 20px 50px rgba(0,0,0,0.9), 0 0 20px rgba(77, 130, 164, 0.4)'
@@ -42,7 +42,7 @@ export default function ProjectDossierModal({ node, onClose }) {
               </span>
             </div>
 
-            <h2 className="text-lg md:text-2xl font-silk font-bold text-white tracking-wider">
+            <h2 className="text-base sm:text-xl md:text-2xl font-silk font-bold text-white tracking-wider">
               {node.name}
             </h2>
 
@@ -57,11 +57,26 @@ export default function ProjectDossierModal({ node, onClose }) {
               soundEffects.close();
               onClose();
             }}
-            className="w-8 h-8 rounded border-2 border-black bg-[#1f3144] hover:bg-[#324d6b] text-white flex items-center justify-center font-silk text-sm cursor-pointer"
+            className="w-8 h-8 rounded border-2 border-black bg-[#1f3144] hover:bg-[#324d6b] text-white flex items-center justify-center font-silk text-sm cursor-pointer shadow"
           >
             ✕
           </button>
         </div>
+
+        {/* Project AI Preview Banner Image */}
+        {node.thumbnail && (
+          <div className="w-full h-44 sm:h-56 md:h-64 rounded-lg overflow-hidden border-2 border-black bg-black relative shadow-inner flex-shrink-0">
+            <img
+              src={node.thumbnail}
+              alt={node.name}
+              className="w-full h-full object-cover"
+              onError={(e) => { e.target.style.display = 'none'; }}
+            />
+            <div className="absolute bottom-2 left-2 px-2.5 py-1 rounded bg-black/80 border border-cyan-400 font-silk text-[10px] text-cyan-300 uppercase tracking-wider">
+              {node.category}
+            </div>
+          </div>
+        )}
 
         {/* Action Buttons: GitHub Repo & Demo Links */}
         <div className="flex flex-wrap items-center gap-3">
@@ -71,10 +86,10 @@ export default function ProjectDossierModal({ node, onClose }) {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => soundEffects.click()}
-              className="px-4 py-2 rounded border-2 border-black bg-[#24292e] hover:bg-[#2f363d] text-white font-silk text-xs font-bold tracking-wider flex items-center gap-2 shadow transition-transform active:scale-95 cursor-pointer"
+              className="px-4 py-2 rounded-lg border-2 border-black bg-[#24292e] hover:bg-[#2f363d] text-white font-silk text-xs font-bold tracking-wider flex items-center gap-2 shadow transition-transform active:scale-95 cursor-pointer"
             >
               <span>🔗 GITHUB REPOSITORY</span>
-              <span className="text-gray-400 text-[10px]">↗</span>
+              <span className="text-cyan-400 text-[10px]">↗</span>
             </a>
           )}
           {node.demoUrl && (
@@ -83,7 +98,7 @@ export default function ProjectDossierModal({ node, onClose }) {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => soundEffects.click()}
-              className="px-4 py-2 rounded border-2 border-black bg-[#e8a838] hover:bg-[#ffd277] text-black font-silk text-xs font-bold tracking-wider flex items-center gap-2 shadow transition-transform active:scale-95 cursor-pointer"
+              className="px-4 py-2 rounded-lg border-2 border-black bg-[#e8a838] hover:bg-[#ffd277] text-black font-silk text-xs font-bold tracking-wider flex items-center gap-2 shadow transition-transform active:scale-95 cursor-pointer"
             >
               <span>🚀 VIEW PROJECT / PROFILE</span>
               <span className="text-black text-[10px]">↗</span>
@@ -93,7 +108,7 @@ export default function ProjectDossierModal({ node, onClose }) {
 
         {/* Confidentiality Notice if applicable */}
         {node.confidential && (
-          <div className="p-3 bg-amber-950/40 border border-amber-500/40 rounded flex items-start gap-2.5 text-xs font-mono text-amber-200">
+          <div className="p-3 bg-amber-950/40 border border-amber-500/40 rounded-lg flex items-start gap-2.5 text-xs font-mono text-amber-200">
             <span className="text-amber-400 font-bold">⚠️</span>
             <span>{node.confidentialNote}</span>
           </div>
@@ -105,7 +120,7 @@ export default function ProjectDossierModal({ node, onClose }) {
             <div className="text-[10px] font-silk text-cyan-400 uppercase tracking-widest">
               [ 01 // PROBLEM STATEMENT ]
             </div>
-            <p className="text-xs md:text-sm font-mono text-gray-200 leading-relaxed bg-[#111f2e] p-3.5 rounded border border-[#1d334a]">
+            <p className="text-xs md:text-sm font-mono text-gray-200 leading-relaxed bg-[#111f2e] p-3.5 rounded-lg border border-[#1d334a]">
               {node.problem}
             </p>
           </div>
@@ -117,13 +132,13 @@ export default function ProjectDossierModal({ node, onClose }) {
             <div className="text-[10px] font-silk text-cyan-400 uppercase tracking-widest">
               [ 02 // TECHNICAL APPROACH &amp; SOLUTION ]
             </div>
-            <p className="text-xs md:text-sm font-mono text-gray-200 leading-relaxed bg-[#111f2e] p-3.5 rounded border border-[#1d334a]">
+            <p className="text-xs md:text-sm font-mono text-gray-200 leading-relaxed bg-[#111f2e] p-3.5 rounded-lg border border-[#1d334a]">
               {node.solution}
             </p>
           </div>
         )}
 
-        {/* Architecture Flow (for CampusLLM or complex systems) */}
+        {/* Architecture Flow */}
         {node.architecture && (
           <div className="space-y-2">
             <div className="text-[10px] font-silk text-cyan-400 uppercase tracking-widest">
@@ -131,7 +146,7 @@ export default function ProjectDossierModal({ node, onClose }) {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
               {node.architecture.map((arch) => (
-                <div key={arch.step} className="bg-[#101c29] border border-[#20364c] p-3 rounded flex flex-col justify-between">
+                <div key={arch.step} className="bg-[#101c29] border border-[#20364c] p-3 rounded-lg flex flex-col justify-between shadow-sm">
                   <div className="flex items-center justify-between text-cyan-400 font-pixel text-[9px] mb-1">
                     <span>STEP {arch.step}</span>
                   </div>
@@ -153,7 +168,7 @@ export default function ProjectDossierModal({ node, onClose }) {
             <div className="text-[10px] font-silk text-cyan-400 uppercase tracking-widest">
               [ 04 // ENGINEERING HIGHLIGHTS ]
             </div>
-            <ul className="space-y-2 bg-[#111f2e] p-3.5 rounded border border-[#1d334a]">
+            <ul className="space-y-2 bg-[#111f2e] p-3.5 rounded-lg border border-[#1d334a]">
               {node.highlights.map((item, idx) => (
                 <li key={idx} className="flex items-start gap-2 text-xs font-mono text-gray-200">
                   <span className="text-cyan-400 font-bold mt-0.5">■</span>
@@ -166,7 +181,7 @@ export default function ProjectDossierModal({ node, onClose }) {
 
         {/* Measurable Results */}
         {node.result && (
-          <div className="p-3.5 bg-[#79a86b]/15 border border-[#79a86b]/40 rounded flex items-center justify-between">
+          <div className="p-3.5 bg-[#79a86b]/15 border border-[#79a86b]/40 rounded-lg flex items-center justify-between">
             <span className="text-[10px] font-silk text-[#9dd48d] uppercase tracking-widest">
               MEASURABLE OUTCOME:
             </span>
@@ -202,7 +217,7 @@ export default function ProjectDossierModal({ node, onClose }) {
               soundEffects.close();
               onClose();
             }}
-            className="px-6 py-2 rounded border-2 border-black bg-[#e8a838] hover:bg-[#ffd277] text-black font-silk text-xs font-bold uppercase tracking-wider transition-colors shadow cursor-pointer"
+            className="px-6 py-2 rounded-lg border-2 border-black bg-[#e8a838] hover:bg-[#ffd277] text-black font-silk text-xs font-bold uppercase tracking-wider transition-colors shadow cursor-pointer"
           >
             CLOSE DOSSIER
           </button>

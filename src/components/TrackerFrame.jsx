@@ -4,7 +4,7 @@ import { PixelSpiderMask, PixelMascot, PixelSpeaker, PixelSpiderMarker } from '.
 import MapViewport from './MapViewport';
 import HangingSpiderman from './HangingSpiderman';
 import WebClickEffect from './WebClickEffect';
-import CinematicIntro from './CinematicIntro';
+import IntroScreen from './IntroScreen';
 import NavigationOverlay from './NavigationOverlay';
 import ActivityLogOverlay from './ActivityLogOverlay';
 import EngineeringWatchOverlay from './EngineeringWatchOverlay';
@@ -18,7 +18,7 @@ import { setSoundEnabled, soundEffects } from '../utils/audio';
 export default function TrackerFrame() {
   const [showIntro, setShowIntro] = useState(() => {
     try {
-      return !localStorage.getItem('hasSeenSanjayIntro_v1');
+      return !localStorage.getItem('hasSeenSanjayIntro_v2');
     } catch (e) {
       return true;
     }
@@ -31,15 +31,16 @@ export default function TrackerFrame() {
   const [selectedDossierNode, setSelectedDossierNode] = useState(null);
   const [statusToast, setStatusToast] = useState(null);
 
-  // Complete Intro
-  const handleIntroComplete = () => {
+  // Complete Intro Screen
+  const handleStartTracker = (enableSound) => {
+    setIsSoundOn(enableSound);
     setShowIntro(false);
     try {
-      localStorage.setItem('hasSeenSanjayIntro_v1', 'true');
+      localStorage.setItem('hasSeenSanjayIntro_v2', 'true');
     } catch (e) {}
   };
 
-  // Replay Intro
+  // Replay Intro Screen
   const handleReplayIntro = () => {
     soundEffects.open();
     setShowIntro(true);
@@ -103,11 +104,6 @@ export default function TrackerFrame() {
       
       {/* Global Interactive Web-Shooter Click Effect */}
       <WebClickEffect />
-
-      {/* Cinematic Initialization Sequence (2.5s with Instant Skip) */}
-      {showIntro && (
-        <CinematicIntro onComplete={handleIntroComplete} />
-      )}
 
       {/* ========================================================
           SLATE-BLUE RETRO MONITOR FRAME (Expanded Full Viewport)
@@ -196,6 +192,8 @@ export default function TrackerFrame() {
 
         {/* Inner Viewport Screen (Real Tactical Map) */}
         <div className="relative flex-1 w-full rounded-xl overflow-hidden border-2 sm:border-3 border-black shadow-[inset_0_4px_12px_rgba(0,0,0,0.8)] bg-[#0a111a] mt-7 sm:mt-8 mb-7 sm:mb-8 min-h-0">
+          
+          {/* Tactical Real Map */}
           <MapViewport
             confirmedActive={confirmedActive}
             rumoredActive={rumoredActive}
@@ -204,6 +202,11 @@ export default function TrackerFrame() {
             onTriggerToast={triggerToast}
             onOpenActivityLog={() => setActiveOverlay('activity')}
           />
+
+          {/* Intro Screen Matching ezgif-frame-020 */}
+          {showIntro && (
+            <IntroScreen onStart={handleStartTracker} />
+          )}
 
           {/* Navigation Overlay */}
           <NavigationOverlay
@@ -217,6 +220,7 @@ export default function TrackerFrame() {
             isOpen={activeOverlay === 'activity'}
             onClose={() => setActiveOverlay(null)}
             onSelectNode={(node) => setSelectedDossierNode(node)}
+            onSelectTab={(tabId) => handleSelectView(tabId)}
           />
 
           {/* Engineering Watch Carousel */}
@@ -354,7 +358,7 @@ export default function TrackerFrame() {
             <button
               onClick={handleReplayIntro}
               className="hover:text-white transition-colors cursor-pointer"
-              title="Replay cinematic initialization sequence"
+              title="Replay intro sound configuration"
             >
               REPLAY INTRO
             </button>

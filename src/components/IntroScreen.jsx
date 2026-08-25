@@ -1,116 +1,82 @@
-import React, { useState, useEffect } from 'react';
-import { PixelMascot } from './PixelIcons';
+import React, { useState } from 'react';
+import { PixelSpiderMask } from './PixelIcons';
 import { setSoundEnabled, soundEffects } from '../utils/audio';
 
-export default function IntroScreen({ onStartTracking }) {
-  const [bootIndex, setBootIndex] = useState(0);
+export default function IntroScreen({ onStart }) {
+  const [selectedSound, setSelectedSound] = useState(true); // default SOUND ON
 
-  const bootLogs = [
-    'INITIALIZING SANJAYKUMAR TRACKER v4.2.0...',
-    'BOOTING CORE SERVICES [OK]',
-    'INITIALIZING MAP RENDER PIPELINE...',
-    'LOADING BASE ASSETS: FRAME UI [OK]',
-    'LOADING BASE ASSETS: TICKER MODULE [OK]',
-    'STARTING EVENT BUS [OK]',
-    'CALIBRATING SPRITESHEET RENDERER [OK]',
-    'WARMING VECTOR & EMBEDDING CACHE...',
-    'CHECKING FONT REGISTRY [OK]',
-    'VALIDATING ROUTE HANDLERS [OK]',
-    'CONNECTING TO VIT VELLORE HUB...'
-  ];
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setBootIndex((prev) => (prev < bootLogs.length ? prev + 1 : prev));
-    }, 150);
-    return () => clearInterval(timer);
-  }, [bootLogs.length]);
-
-  const handleChoice = (enableAudio) => {
-    try {
-      setSoundEnabled(enableAudio);
-      if (enableAudio) {
-        soundEffects.intro();
-      } else {
-        soundEffects.click();
-      }
-    } catch (e) {
-      console.warn('Audio opt-in error:', e);
+  const handleStart = (enableSound) => {
+    setSoundEnabled(enableSound);
+    if (enableSound) {
+      soundEffects.select();
     }
-    onStartTracking();
+    onStart(enableSound);
   };
 
   return (
-    <div className="absolute inset-0 z-50 bg-[#0d1622]/95 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center select-none overflow-hidden scanline-overlay transition-opacity duration-300">
-      {/* Background Subtle Radar Grid */}
-      <div 
-        className="absolute inset-0 opacity-10 pointer-events-none"
-        style={{
-          backgroundImage: 'radial-gradient(#4d82a4 1px, transparent 1px), linear-gradient(to right, #1b2e44 1px, transparent 1px), linear-gradient(to bottom, #1b2e44 1px, transparent 1px)',
-          backgroundSize: '40px 40px, 40px 40px, 40px 40px'
-        }}
-      />
-
-      {/* Boot Logs Terminal (Left Side Overlay - matching Screenshot 1) */}
-      <div className="absolute left-6 top-10 bottom-10 hidden xl:flex flex-col justify-end text-left font-mono text-[9px] text-[#34516d] pointer-events-none max-w-xs space-y-1">
-        {bootLogs.slice(0, bootIndex).map((log, idx) => (
-          <div key={idx} className="transition-opacity duration-200">
-            {log}
-          </div>
-        ))}
+    <div className="absolute inset-0 z-50 bg-[#0d1622]/95 backdrop-blur-sm flex flex-col items-center justify-center p-4 select-none scanline-overlay animate-in fade-in duration-300">
+      
+      {/* Hanging Spiderman from Top */}
+      <div className="flex flex-col items-center mb-3 animate-swing">
+        <div className="w-[2px] h-14 sm:h-20 bg-gradient-to-b from-white via-white/80 to-cyan-300 shadow-[0_0_8px_white]" />
+        <div className="relative w-16 h-24 sm:w-20 sm:h-28">
+          <img
+            src="/spidey/spiderman-hanging-transparent.png"
+            alt="Hanging Spiderman"
+            className="w-full h-full object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.9)]"
+            onError={(e) => {
+              e.target.src = '/spidey/marvel-comics-white-background-spider-man-wallpaper-preview-Photoroom.png';
+            }}
+          />
+        </div>
       </div>
 
-      {/* Main Intro Center Card */}
-      <div className="relative z-10 max-w-xl w-full flex flex-col items-center">
-        {/* Hanging Web Line from Ceiling */}
-        <div className="w-[1.5px] h-14 bg-white/70 shadow-[0_0_8px_white]" />
-        
-        {/* Hanging Pixel Mascot Animation */}
-        <div className="animate-swing mb-5 -mt-1">
-          <PixelMascot className="w-16 h-20 drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)]" />
-        </div>
-
-        {/* Welcome Message Heading */}
-        <h2 className="text-xs sm:text-sm md:text-base font-silk text-[#e2f0fb] leading-relaxed tracking-wider mb-3 max-w-md">
-          WELCOME TO THE <span className="text-cyan-400 font-bold">SANJAYKUMAR</span> TRACKER.
-        </h2>
-
-        <p className="text-[11px] sm:text-xs md:text-sm font-silk text-[#8cb0cc] leading-relaxed tracking-wide mb-5 max-w-lg">
-          INTERACT WITH THE MAP TO VIEW
+      {/* Main Intro Card */}
+      <div className="w-full max-w-lg text-center flex flex-col items-center">
+        {/* Header Text */}
+        <h2 className="font-silk text-xs sm:text-sm md:text-base text-[#e2f0fb] leading-relaxed tracking-wider uppercase font-bold mb-4 px-4 drop-shadow">
+          WELCOME TO THE SANJAYKUMAR TRACKER.
           <br />
-          <span className="text-white font-bold">ENGINEERING MILESTONES &amp; PROJECTS</span>
+          <span className="text-cyan-300">INTERACT WITH THE MAP TO VIEW</span>
+          <br />
+          ENGINEERING SIGHTINGS &amp; MISSIONS
           <br />
           ALL OVER THE WORLD.
-        </p>
+        </h2>
 
-        {/* 8-bit Animated Progress Blocks */}
-        <div className="flex items-center gap-1.5 mb-6">
-          {[...Array(8)].map((_, i) => (
+        {/* Animated 8-bit Audio Equalizer Bars */}
+        <div className="flex items-center justify-center gap-1.5 my-4 h-8">
+          {[40, 70, 90, 60, 100, 80, 50, 85, 45].map((height, i) => (
             <div
               key={i}
-              className="w-2.5 h-4 bg-cyan-400 border border-black shadow"
+              className="w-1.5 sm:w-2 bg-gradient-to-t from-cyan-600 to-cyan-300 rounded-xs transition-all duration-300 animate-pulse"
               style={{
-                animation: `pulse 1.2s infinite ease-in-out ${i * 0.15}s`
+                height: `${height}%`,
+                animationDelay: `${i * 120}ms`
               }}
             />
           ))}
         </div>
 
-        {/* Audio Choice Prompts */}
-        <p className="text-[10px] sm:text-[11px] font-silk text-[#5b83a3] uppercase tracking-widest mb-4">
+        {/* Prompt */}
+        <p className="font-silk text-[10px] sm:text-xs text-gray-300 tracking-wider uppercase mb-5">
           CHOOSE YOUR SETTINGS AND START TRACKING
         </p>
 
-        <div className="flex flex-wrap items-center justify-center gap-4">
+        {/* Sound Selection Buttons matching Screenshot ezgif-frame-020 */}
+        <div className="flex items-center gap-4 sm:gap-6">
           <button
-            onClick={() => handleChoice(true)}
-            className="px-6 sm:px-8 py-2.5 sm:py-3 rounded border-2 border-black bg-[#4d82a4] hover:bg-[#689ec4] text-white font-silk text-xs tracking-widest uppercase transition-all shadow-[0_4px_0_#000] active:translate-y-1 active:shadow-none cursor-pointer"
+            onClick={() => handleStart(true)}
+            onMouseEnter={() => soundEffects.click()}
+            className="px-5 sm:px-8 py-2.5 rounded-lg border-2 sm:border-3 border-black bg-cyan-400 text-black font-silk text-xs sm:text-sm font-bold uppercase tracking-wider shadow-[0_4px_0_#000,inset_1px_1px_0_rgba(255,255,255,0.6)] hover:bg-cyan-300 hover:scale-105 active:translate-y-1 transition-all cursor-pointer"
           >
             SOUND ON
           </button>
+
           <button
-            onClick={() => handleChoice(false)}
-            className="px-6 sm:px-8 py-2.5 sm:py-3 rounded border-2 border-black bg-[#1b2b3a] hover:bg-[#283f54] text-gray-300 font-silk text-xs tracking-widest uppercase transition-all shadow-[0_4px_0_#000] active:translate-y-1 active:shadow-none cursor-pointer"
+            onClick={() => handleStart(false)}
+            onMouseEnter={() => soundEffects.click()}
+            className="px-5 sm:px-8 py-2.5 rounded-lg border-2 sm:border-3 border-black bg-[#1f3144] text-gray-300 font-silk text-xs sm:text-sm font-bold uppercase tracking-wider shadow-[0_4px_0_#000] hover:bg-[#2c455f] hover:text-white active:translate-y-1 transition-all cursor-pointer"
           >
             SOUND OFF
           </button>
