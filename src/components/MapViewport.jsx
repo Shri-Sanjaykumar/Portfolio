@@ -60,45 +60,50 @@ export default function MapViewport({
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
-    if (mapInstanceRef.current) {
-      mapInstanceRef.current.remove();
-    }
-
-    const map = L.map(mapContainerRef.current, {
-      center: [20, 10],
-      zoom: 2.2,
-      minZoom: 2,
-      maxZoom: 18,
-      zoomControl: false,
-      attributionControl: false,
-    });
-
-    mapInstanceRef.current = map;
-
-    // Dark Map Tiles (CartoDB Dark Matter)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png', {
-      subdomains: 'abcd',
-      maxZoom: 19,
-    }).addTo(map);
-
-    // Invalidate size on mount and window resize so tiles fill instantly
-    const handleResize = () => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.invalidateSize();
-      }
-    };
-
-    setTimeout(handleResize, 100);
-    setTimeout(handleResize, 500);
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
+    try {
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
       }
-    };
+
+      const leafletObj = L.map ? L : (window.L || L.default || L);
+      const map = leafletObj.map(mapContainerRef.current, {
+        center: [20, 10],
+        zoom: 2.2,
+        minZoom: 2,
+        maxZoom: 18,
+        zoomControl: false,
+        attributionControl: false,
+      });
+
+      mapInstanceRef.current = map;
+
+      // Dark Map Tiles (CartoDB Dark Matter)
+      leafletObj.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png', {
+        subdomains: 'abcd',
+        maxZoom: 19,
+      }).addTo(map);
+
+      // Invalidate size on mount and window resize so tiles fill instantly
+      const handleResize = () => {
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.invalidateSize();
+        }
+      };
+
+      setTimeout(handleResize, 100);
+      setTimeout(handleResize, 500);
+      window.addEventListener('resize', handleResize);
+
+      return () => {
+        window.removeEventListener('resize', handleResize);
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.remove();
+          mapInstanceRef.current = null;
+        }
+      };
+    } catch (err) {
+      console.warn('Leaflet initialization fallback:', err);
+    }
   }, []);
 
   // Invalidate map size when intro closes
@@ -117,32 +122,37 @@ export default function MapViewport({
     const map = mapInstanceRef.current;
     if (!map) return;
 
-    markersRef.current.forEach((m) => map.removeLayer(m));
-    markersRef.current = [];
+    try {
+      const leafletObj = L.divIcon ? L : (window.L || L.default || L);
+      markersRef.current.forEach((m) => map.removeLayer(m));
+      markersRef.current = [];
 
-    const visibleNodes = trackerNodes.filter((node) => {
-      if (node.status === 'CONFIRMED' && !confirmedActive) return false;
-      if (node.status === 'RUMORED' && !rumoredActive) return false;
-      return true;
-    });
-
-    visibleNodes.forEach((node) => {
-      const customIcon = L.divIcon({
-        className: 'custom-pixel-marker',
-        html: createMarkerHtml(node),
-        iconSize: [32, 32],
-        iconAnchor: [16, 16],
+      const visibleNodes = trackerNodes.filter((node) => {
+        if (node.status === 'CONFIRMED' && !confirmedActive) return false;
+        if (node.status === 'RUMORED' && !rumoredActive) return false;
+        return true;
       });
 
-      const marker = L.marker([node.lat, node.lng], { icon: customIcon }).addTo(map);
+      visibleNodes.forEach((node) => {
+        const customIcon = leafletObj.divIcon({
+          className: 'custom-pixel-marker',
+          html: createMarkerHtml(node),
+          iconSize: [32, 32],
+          iconAnchor: [16, 16],
+        });
 
-      marker.on('click', () => {
-        soundEffects.marker();
-        setSelectedPopupNode(node);
+        const marker = leafletObj.marker([node.lat, node.lng], { icon: customIcon }).addTo(map);
+
+        marker.on('click', () => {
+          soundEffects.marker();
+          setSelectedPopupNode(node);
+        });
+
+        markersRef.current.push(marker);
       });
-
-      markersRef.current.push(marker);
-    });
+    } catch (err) {
+      console.warn('Marker creation error:', err);
+    }
   }, [confirmedActive, rumoredActive]);
 
   // Global View Reset
