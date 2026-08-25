@@ -1,24 +1,27 @@
 import React, { useState } from 'react';
-import { PixelSpiderMask } from './PixelIcons';
 import { setSoundEnabled, soundEffects } from '../utils/audio';
 
 export default function IntroScreen({ onStart }) {
-  const [selectedSound, setSelectedSound] = useState(true); // default SOUND ON
+  const [isClosing, setIsClosing] = useState(false);
 
-  const handleStart = (enableSound) => {
+  const handleSelectSound = (enableSound) => {
+    soundEffects.select();
     setSoundEnabled(enableSound);
-    if (enableSound) {
-      soundEffects.select();
-    }
-    onStart(enableSound);
+    setIsClosing(true);
+    setTimeout(() => {
+      onStart(enableSound);
+    }, 250);
   };
 
   return (
-    <div className="absolute inset-0 z-50 bg-[#0d1622]/95 backdrop-blur-sm flex flex-col items-center justify-center p-4 select-none scanline-overlay animate-in fade-in duration-300">
-      
+    <div
+      className={`absolute inset-0 z-50 bg-[#0d1622]/95 backdrop-blur-sm flex flex-col items-center justify-center p-4 select-none scanline-overlay transition-all duration-300 ${
+        isClosing ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'
+      }`}
+    >
       {/* Hanging Spiderman from Top */}
       <div className="flex flex-col items-center mb-3 animate-swing">
-        <div className="w-[2px] h-14 sm:h-20 bg-gradient-to-b from-white via-white/80 to-cyan-300 shadow-[0_0_8px_white]" />
+        <div className="w-[2px] h-12 sm:h-16 bg-gradient-to-b from-white via-white/80 to-cyan-300 shadow-[0_0_8px_white]" />
         <div className="relative w-16 h-24 sm:w-20 sm:h-28">
           <img
             src="/spidey/spiderman-hanging-transparent.png"
@@ -33,7 +36,7 @@ export default function IntroScreen({ onStart }) {
 
       {/* Main Intro Card */}
       <div className="w-full max-w-lg text-center flex flex-col items-center">
-        {/* Header Text */}
+        {/* Header Text matching ezgif-frame-020 */}
         <h2 className="font-silk text-xs sm:text-sm md:text-base text-[#e2f0fb] leading-relaxed tracking-wider uppercase font-bold mb-4 px-4 drop-shadow">
           WELCOME TO THE SANJAYKUMAR TRACKER.
           <br />
@@ -66,7 +69,7 @@ export default function IntroScreen({ onStart }) {
         {/* Sound Selection Buttons matching Screenshot ezgif-frame-020 */}
         <div className="flex items-center gap-4 sm:gap-6">
           <button
-            onClick={() => handleStart(true)}
+            onClick={() => handleSelectSound(true)}
             onMouseEnter={() => soundEffects.click()}
             className="px-5 sm:px-8 py-2.5 rounded-lg border-2 sm:border-3 border-black bg-cyan-400 text-black font-silk text-xs sm:text-sm font-bold uppercase tracking-wider shadow-[0_4px_0_#000,inset_1px_1px_0_rgba(255,255,255,0.6)] hover:bg-cyan-300 hover:scale-105 active:translate-y-1 transition-all cursor-pointer"
           >
@@ -74,7 +77,7 @@ export default function IntroScreen({ onStart }) {
           </button>
 
           <button
-            onClick={() => handleStart(false)}
+            onClick={() => handleSelectSound(false)}
             onMouseEnter={() => soundEffects.click()}
             className="px-5 sm:px-8 py-2.5 rounded-lg border-2 sm:border-3 border-black bg-[#1f3144] text-gray-300 font-silk text-xs sm:text-sm font-bold uppercase tracking-wider shadow-[0_4px_0_#000] hover:bg-[#2c455f] hover:text-white active:translate-y-1 transition-all cursor-pointer"
           >

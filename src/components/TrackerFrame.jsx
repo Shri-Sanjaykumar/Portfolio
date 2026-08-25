@@ -16,13 +16,8 @@ import LeadershipEducationOverlay from './LeadershipEducationOverlay';
 import { setSoundEnabled, soundEffects } from '../utils/audio';
 
 export default function TrackerFrame() {
-  const [showIntro, setShowIntro] = useState(() => {
-    try {
-      return !localStorage.getItem('hasSeenSanjayIntro_v2');
-    } catch (e) {
-      return true;
-    }
-  });
+  // Always show intro screen on fresh load / refresh
+  const [showIntro, setShowIntro] = useState(true);
 
   const [isSoundOn, setIsSoundOn] = useState(false);
   const [confirmedActive, setConfirmedActive] = useState(true);
@@ -35,9 +30,7 @@ export default function TrackerFrame() {
   const handleStartTracker = (enableSound) => {
     setIsSoundOn(enableSound);
     setShowIntro(false);
-    try {
-      localStorage.setItem('hasSeenSanjayIntro_v2', 'true');
-    } catch (e) {}
+    triggerToast(enableSound ? '🔊 AUDIO ENGINE: ONLINE' : '🔇 AUDIO ENGINE: MUTED');
   };
 
   // Replay Intro Screen
@@ -201,6 +194,7 @@ export default function TrackerFrame() {
             statusToast={statusToast}
             onTriggerToast={triggerToast}
             onOpenActivityLog={() => setActiveOverlay('activity')}
+            isIntroActive={showIntro}
           />
 
           {/* Intro Screen Matching ezgif-frame-020 */}

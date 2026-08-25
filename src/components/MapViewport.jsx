@@ -101,6 +101,17 @@ export default function MapViewport({
     };
   }, []);
 
+  // Invalidate map size when intro closes
+  useEffect(() => {
+    if (!isIntroActive && mapInstanceRef.current) {
+      setTimeout(() => {
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.invalidateSize();
+        }
+      }, 300);
+    }
+  }, [isIntroActive]);
+
   // Update Markers when filters change
   useEffect(() => {
     const map = mapInstanceRef.current;
