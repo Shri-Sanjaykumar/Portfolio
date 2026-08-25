@@ -4,6 +4,8 @@ import MapViewport from './MapViewport';
 import IntroScreen from './IntroScreen';
 import SpideyMenuOverlay from './SpideyMenuOverlay';
 import ProjectDossierModal from './ProjectDossierModal';
+import DynamicSpiderman3D from './DynamicSpiderman3D';
+import TacticalHUDGuide from './TacticalHUDGuide';
 import WebClickEffect from './WebClickEffect';
 import { setSoundEnabled, soundEffects } from '../utils/audio';
 
@@ -109,8 +111,9 @@ export default function TrackerFrame({ onReplayIntro }) {
   const [isSoundOn, setIsSoundOn] = useState(false);
   const [confirmedActive, setConfirmedActive] = useState(true);
   const [rumoredActive, setRumoredActive]   = useState(true);
-  const [activeMenuTab, setActiveMenuTab]   = useState(null); // null = menu closed (shows map) | 'activity' | 'skills' | 'projects' | 'internship' | 'about' | 'connect' | 'help'
+  const [activeMenuTab, setActiveMenuTab]   = useState(null); // null = map view
   const [selectedNode, setSelectedNode]     = useState(null);
+  const [showHUDGuide, setShowHUDGuide]     = useState(false);
   const [toast, setToast]                   = useState(null);
   const [mascotFrame, setMascotFrame]       = useState(0);
 
@@ -124,12 +127,13 @@ export default function TrackerFrame({ onReplayIntro }) {
   useEffect(() => {
     const fn = (e) => {
       if (e.key !== 'Escape') return;
+      if (showHUDGuide)   { setShowHUDGuide(false); return; }
       if (selectedNode)   { setSelectedNode(null); return; }
       if (activeMenuTab)  { try { soundEffects.close?.(); } catch {}; setActiveMenuTab(null); }
     };
     window.addEventListener('keydown', fn);
     return () => window.removeEventListener('keydown', fn);
-  }, [activeMenuTab, selectedNode]);
+  }, [activeMenuTab, selectedNode, showHUDGuide]);
 
   const triggerToast = useCallback((msg) => {
     setToast(msg);
@@ -141,7 +145,10 @@ export default function TrackerFrame({ onReplayIntro }) {
     setSoundEnabled(sound);
     setShowIntro(false);
     try { sessionStorage.setItem('tracker_sound_set', 'yes'); } catch {}
-    setTimeout(() => triggerToast(sound ? '🔊 AUDIO ENGINE: ONLINE' : '🔇 AUDIO ENGINE: MUTED'), 300);
+    setTimeout(() => {
+      triggerToast(sound ? '🔊 AUDIO ENGINE: ONLINE' : '🔇 AUDIO ENGINE: MUTED');
+      setShowHUDGuide(true); // Display tactical arrow guide right after intro
+    }, 400);
   }, [triggerToast]);
 
   const toggleSound = useCallback(() => {
@@ -185,7 +192,7 @@ export default function TrackerFrame({ onReplayIntro }) {
       <WebClickEffect />
 
       {/* ════════════════════════════════════════════════════════
-          RETRO MONITOR — exact spideytracker.net blue frame
+          RETRO MONITOR FRAME — exact spideytracker.net blue frame
           ════════════════════════════════════════════════════════ */}
       <div
         className="relative flex-1 min-h-0 w-full max-w-[1600px] mx-auto flex flex-col"
@@ -198,22 +205,13 @@ export default function TrackerFrame({ onReplayIntro }) {
         }}
       >
 
-        {/* ── HANGING SPIDER-MAN (top-center, swinging from web) ── */}
+        {/* ── BIG DYNAMIC 3D SPIDER-MAN (Swings and repositions dynamically across sections) ── */}
         {!showIntro && (
-          <div
-            className="absolute top-0 z-30 flex flex-col items-center cursor-pointer animate-swing"
-            style={{ left: '50%', transform: 'translateX(-50%)', transformOrigin: 'top center' }}
-            onClick={() => { triggerToast('🕷️ SPIDER-SENSE TINGLING!'); }}
-            title="Spider-Sense!"
-          >
-            <div className="w-px bg-white/90" style={{ height: 80, boxShadow: '0 0 4px rgba(255,255,255,0.7)' }}/>
-            <img
-              src="/spidey/spiderman-swinging.png"
-              alt="Hanging Spider-Man"
-              className="object-contain"
-              style={{ width: 90, height: 140, filter: 'drop-shadow(0 6px 20px rgba(0,0,0,0.95))' }}
-            />
-          </div>
+          <DynamicSpiderman3D
+            activeSection={activeMenuTab || 'default'}
+            isDossierOpen={!!selectedNode}
+            onTriggerToast={triggerToast}
+          />
         )}
 
         {/* ── TOP LEFT: Orange circle menu button ── */}
@@ -293,7 +291,7 @@ export default function TrackerFrame({ onReplayIntro }) {
           </svg>
         </button>
 
-        {/* ── LEFT FILTER TABS (green/red spider — same as spideytracker) ── */}
+        {/* ── LEFT FILTER TABS (green/red spider) ── */}
         <div className="absolute left-0 z-30 flex flex-col gap-2" style={{ top: 72 }}>
           <button onClick={toggleConfirmed}
             title={confirmedActive ? 'Hide Confirmed' : 'Show Confirmed'}
@@ -327,7 +325,7 @@ export default function TrackerFrame({ onReplayIntro }) {
           </button>
         </div>
 
-        {/* ── INNER VIEWPORT (MAP & OVERLAYS AREA) ── */}
+        {/* ── INNER VIEWPORT (MAP & OVERLAYS) ── */}
         <div
           className="relative flex-1 min-h-0 w-full overflow-hidden"
           style={{
@@ -350,10 +348,16 @@ export default function TrackerFrame({ onReplayIntro }) {
             isIntroActive={showIntro}
           />
 
-          {/* ── INTRO SOUND SCREEN (Matching Frame 020) ── */}
+          {/* ── INTRO SOUND SCREEN ── */}
           {showIntro && <IntroScreen onStart={handleStartTracker}/>}
 
-          {/* ── SPIDEY MENU OVERLAY (Split Navigation: Left Menu + Right Active Content) ── */}
+          {/* ── TACTICAL HUD ARROW ONBOARDING GUIDE ── */}
+          <TacticalHUDGuide
+            isOpen={showHUDGuide}
+            onClose={() => setShowHUDGuide(false)}
+          />
+
+          {/* ── SPIDEY MENU OVERLAY (Split Navigation) ── */}
           <SpideyMenuOverlay
             isOpen={!!activeMenuTab}
             activeTab={activeMenuTab}
@@ -362,11 +366,12 @@ export default function TrackerFrame({ onReplayIntro }) {
             onSelectNode={(node) => setSelectedNode(node)}
           />
 
-          {/* ── FULL PROJECT DOSSIER MODAL ── */}
+          {/* ── FULL PROJECT LAB DOSSIER MODAL (With Next/Prev Navigation) ── */}
           {selectedNode && (
             <ProjectDossierModal
               node={selectedNode}
               onClose={() => setSelectedNode(null)}
+              onSelectNode={(node) => setSelectedNode(node)}
             />
           )}
         </div>
@@ -412,7 +417,7 @@ export default function TrackerFrame({ onReplayIntro }) {
       </div>
 
       {/* ════════════════════════════════════════════════════════
-          BOTTOM ACTION BAR — exactly like spideytracker
+          BOTTOM ACTION BAR
           ════════════════════════════════════════════════════════ */}
       <div className="w-full max-w-[1600px] mx-auto flex items-center justify-between gap-2 mt-1.5 px-0.5">
 
@@ -450,6 +455,8 @@ export default function TrackerFrame({ onReplayIntro }) {
             <a href={`mailto:${profile.email}`} className="hover:text-white transition-colors">EMAIL</a>
             <span>·</span>
             <button onClick={() => openTab('activity')} className="hover:text-white transition-colors cursor-pointer">ACTIVITY LOG</button>
+            <span>·</span>
+            <button onClick={() => setShowHUDGuide(true)} className="hover:text-white transition-colors cursor-pointer text-[#e8a838]">HUD GUIDE 🏹</button>
             <span>·</span>
             {onReplayIntro && (
               <>
