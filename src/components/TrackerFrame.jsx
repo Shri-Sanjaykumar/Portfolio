@@ -1,22 +1,13 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { profile, trackerNodes } from '../data/portfolioData';
 import MapViewport from './MapViewport';
 import IntroScreen from './IntroScreen';
+import SpideyMenuOverlay from './SpideyMenuOverlay';
+import ProjectDossierModal from './ProjectDossierModal';
 import WebClickEffect from './WebClickEffect';
 import { setSoundEnabled, soundEffects } from '../utils/audio';
 
-// ─── Overlays ────────────────────────────────────────────────────────────────
-import NavigationOverlay from './NavigationOverlay';
-import ActivityLogOverlay from './ActivityLogOverlay';
-import ProjectsOverlay from './ProjectsOverlay';
-import SkillsArchitectureOverlay from './SkillsArchitectureOverlay';
-import ExperienceOverlay from './ExperienceOverlay';
-import ConnectDrawer from './ConnectDrawer';
-import AboutMeOverlay from './AboutMeOverlay';
-import ProjectDossierModal from './ProjectDossierModal';
-import HelpOverlay from './HelpOverlay';
-
-// ─── Pixel Spider icon (spideytracker.net filter buttons) ────────────────────
+// ─── Pixel Spider icon (filter buttons on left) ──────────────────────────────
 function PixelSpiderIcon({ color = 'green', size = 22 }) {
   const fill = color === 'green' ? '#79a86b' : color === 'red' ? '#cc3333' : '#e6e6e6';
   const bg   = color === 'green' ? '#2d5c30' : color === 'red' ? '#5c1a1a' : '#3a3a3a';
@@ -95,97 +86,6 @@ function SpeakerIcon({ isOn }) {
   );
 }
 
-// ─── Radar widget ─────────────────────────────────────────────────────────────
-function RadarWidget() {
-  return (
-    <div className="absolute bottom-3 right-3 z-20 pointer-events-none flex flex-col items-center gap-1">
-      <div
-        className="relative overflow-hidden"
-        style={{
-          width: 70, height: 70,
-          borderRadius: '50%',
-          background: 'rgba(8,15,25,0.95)',
-          border: '2px solid #1e3d5a',
-          boxShadow: 'inset 0 0 10px rgba(0,0,0,0.8)',
-        }}
-      >
-        {[0,30,60,90,120,150].map(a => (
-          <div key={a} className="absolute inset-0 flex items-center justify-center" style={{ transform: `rotate(${a}deg)` }}>
-            <div className="w-full h-px" style={{ background: 'rgba(30,61,90,0.7)' }}/>
-          </div>
-        ))}
-        {[50,34,18].map(p => (
-          <div key={p} className="absolute rounded-full border" style={{
-            width:`${p}px`,height:`${p}px`,
-            top:'50%',left:'50%',
-            transform:'translate(-50%,-50%)',
-            borderColor:'rgba(30,61,90,0.7)',
-          }}/>
-        ))}
-        <div className="absolute inset-0 flex items-center justify-center animate-radar-sweep">
-          <div className="absolute right-1/2 w-[35%] h-0.5 origin-right"
-            style={{
-              background:'linear-gradient(to right,transparent,rgba(0,255,136,0.8))',
-              transformOrigin:'100% 50%',
-            }}
-          />
-        </div>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-1.5 h-1.5 rounded-full" style={{ background:'#00ff88', boxShadow:'0 0 5px #00ff88' }}/>
-        </div>
-      </div>
-      <svg viewBox="0 0 20 20" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="10" cy="10" r="8" fill="none" stroke="#1e4d6b" strokeWidth="1.2"/>
-        <ellipse cx="10" cy="10" rx="4" ry="8" fill="none" stroke="#1e4d6b" strokeWidth="1"/>
-        <line x1="2" y1="10" x2="18" y2="10" stroke="#1e4d6b" strokeWidth="1"/>
-      </svg>
-    </div>
-  );
-}
-
-// ─── Ruler ticks (top) ────────────────────────────────────────────────────────
-function RulerTop() {
-  return (
-    <div className="absolute top-0 left-14 right-0 h-4 z-10 pointer-events-none flex items-end pb-0.5 px-2 gap-[7px]"
-      style={{ background: 'rgba(8,15,24,0.8)' }}
-    >
-      {Array.from({ length: 48 }).map((_, i) => (
-        <div key={i} className="flex-shrink-0"
-          style={{ width:2, height: i % 4 === 0 ? 8 : i % 2 === 0 ? 5 : 3, background:'#1e3d5a' }}
-        />
-      ))}
-    </div>
-  );
-}
-
-// ─── Ruler ticks (left) ──────────────────────────────────────────────────────
-function RulerLeft() {
-  return (
-    <div className="absolute top-14 left-0 bottom-0 w-[14px] z-10 pointer-events-none flex flex-col items-end pr-0.5 gap-[7px]"
-      style={{ background: 'rgba(8,15,24,0.8)' }}
-    >
-      {Array.from({ length: 34 }).map((_, i) => (
-        <div key={i} className="flex-shrink-0"
-          style={{ height:2, width: i % 4 === 0 ? 8 : i % 2 === 0 ? 5 : 3, background:'#1e3d5a' }}
-        />
-      ))}
-    </div>
-  );
-}
-
-// ─── Toast notification ──────────────────────────────────────────────────────
-function Toast({ message, id }) {
-  return (
-    <div key={id} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none animate-float-up">
-      <div className="bg-black/90 border-2 border-cyan-400 px-5 py-2 rounded-lg font-silk text-xs text-cyan-300 tracking-wider whitespace-nowrap"
-        style={{ boxShadow: '0 0 20px rgba(0,229,255,0.35)' }}
-      >
-        {message}
-      </div>
-    </div>
-  );
-}
-
 // ─── TICKER items ─────────────────────────────────────────────────────────────
 const TICKER = [
   'SHARE YOUR ENGINEERING SIGHTINGS ON X',
@@ -201,7 +101,6 @@ const TICKER = [
   '■ VIT HEALTH CLUB VICE CHAIRPERSON — 200+ PARTICIPANTS',
 ];
 
-// ─── MAIN TRACKER FRAME ───────────────────────────────────────────────────────
 export default function TrackerFrame({ onReplayIntro }) {
   const [showIntro, setShowIntro] = useState(() => {
     try { return sessionStorage.getItem('tracker_sound_set') !== 'yes'; }
@@ -210,13 +109,12 @@ export default function TrackerFrame({ onReplayIntro }) {
   const [isSoundOn, setIsSoundOn] = useState(false);
   const [confirmedActive, setConfirmedActive] = useState(true);
   const [rumoredActive, setRumoredActive]   = useState(true);
-  const [activeOverlay, setActiveOverlay]   = useState(null);
+  const [activeMenuTab, setActiveMenuTab]   = useState(null); // null = menu closed (shows map) | 'activity' | 'skills' | 'projects' | 'internship' | 'about' | 'connect' | 'help'
   const [selectedNode, setSelectedNode]     = useState(null);
   const [toast, setToast]                   = useState(null);
-  const [toastKey, setToastKey]             = useState(0);
   const [mascotFrame, setMascotFrame]       = useState(0);
 
-  // Mascot walk animation
+  // Mascot walk animation loop
   useEffect(() => {
     const iv = setInterval(() => setMascotFrame(f => f === 0 ? 1 : 0), 350);
     return () => clearInterval(iv);
@@ -226,17 +124,16 @@ export default function TrackerFrame({ onReplayIntro }) {
   useEffect(() => {
     const fn = (e) => {
       if (e.key !== 'Escape') return;
-      if (selectedNode)        { setSelectedNode(null); return; }
-      if (activeOverlay)       { soundEffects.close?.(); setActiveOverlay(null); }
+      if (selectedNode)   { setSelectedNode(null); return; }
+      if (activeMenuTab)  { try { soundEffects.close?.(); } catch {}; setActiveMenuTab(null); }
     };
     window.addEventListener('keydown', fn);
     return () => window.removeEventListener('keydown', fn);
-  }, [activeOverlay, selectedNode]);
+  }, [activeMenuTab, selectedNode]);
 
   const triggerToast = useCallback((msg) => {
     setToast(msg);
-    setToastKey(k => k + 1);
-    setTimeout(() => setToast(null), 2600);
+    setTimeout(() => setToast(null), 2500);
   }, []);
 
   const handleStartTracker = useCallback((sound) => {
@@ -246,32 +143,6 @@ export default function TrackerFrame({ onReplayIntro }) {
     try { sessionStorage.setItem('tracker_sound_set', 'yes'); } catch {}
     setTimeout(() => triggerToast(sound ? '🔊 AUDIO ENGINE: ONLINE' : '🔇 AUDIO ENGINE: MUTED'), 300);
   }, [triggerToast]);
-
-  const openOverlay = useCallback((id) => {
-    try { soundEffects.open?.(); } catch {}
-    setActiveOverlay(id);
-  }, []);
-
-  const closeOverlay = useCallback(() => {
-    try { soundEffects.close?.(); } catch {}
-    setActiveOverlay(null);
-  }, []);
-
-  const handleSelectView = useCallback((id) => {
-    const map = {
-      tracker:    null,
-      projects:   'projects',
-      skills:     'skills',
-      internship: 'internship',
-      connect:    'connect',
-      about:      'about',
-      activity:   'activity',
-      help:       'help',
-    };
-    const t = map[id];
-    if (t === null) closeOverlay();
-    else { try { soundEffects.open?.(); } catch {}; setActiveOverlay(t); }
-  }, [closeOverlay]);
 
   const toggleSound = useCallback(() => {
     const next = !isSoundOn;
@@ -289,6 +160,21 @@ export default function TrackerFrame({ onReplayIntro }) {
     try { soundEffects.toggle?.(); } catch {}
     setRumoredActive(v => { triggerToast(`RESEARCH LABS: ${!v ? 'ON' : 'OFF'}`); return !v; });
   }, [triggerToast]);
+
+  const toggleMenu = () => {
+    if (activeMenuTab) {
+      try { soundEffects.close?.(); } catch {}
+      setActiveMenuTab(null);
+    } else {
+      try { soundEffects.open?.(); } catch {}
+      setActiveMenuTab('activity');
+    }
+  };
+
+  const openTab = (tabId) => {
+    try { soundEffects.open?.(); } catch {}
+    setActiveMenuTab(tabId);
+  };
 
   const tickerContent = [...TICKER, ...TICKER];
 
@@ -312,7 +198,7 @@ export default function TrackerFrame({ onReplayIntro }) {
         }}
       >
 
-        {/* ── HANGING SPIDER-MAN (top-center, dangles from top) ── */}
+        {/* ── HANGING SPIDER-MAN (top-center, swinging from web) ── */}
         {!showIntro && (
           <div
             className="absolute top-0 z-30 flex flex-col items-center cursor-pointer animate-swing"
@@ -332,19 +218,18 @@ export default function TrackerFrame({ onReplayIntro }) {
 
         {/* ── TOP LEFT: Orange circle menu button ── */}
         <button
-          onClick={() => setActiveOverlay(activeOverlay === 'nav' ? null : 'nav')}
-          className="absolute top-2 left-2 z-40 flex items-center justify-center cursor-pointer transition-transform active:scale-90"
+          onClick={toggleMenu}
+          className="absolute top-2 left-2 z-50 flex items-center justify-center cursor-pointer transition-transform active:scale-90"
           style={{
             width: 44, height: 44,
             borderRadius: '50%',
-            border: activeOverlay === 'nav' ? '3.5px solid #dc2626' : '3.5px solid #e8a838',
+            border: activeMenuTab ? '3.5px solid #dc2626' : '3.5px solid #e8a838',
             background: '#1a2634',
             boxShadow: '0 4px 0 #000, inset 1px 1px 0 rgba(255,255,255,0.2)',
           }}
           aria-label="Navigation menu"
-          aria-expanded={activeOverlay === 'nav'}
         >
-          {activeOverlay === 'nav' ? (
+          {activeMenuTab ? (
             <svg viewBox="0 0 20 20" width="20" height="20">
               <line x1="4" y1="4" x2="16" y2="16" stroke="#dc2626" strokeWidth="3" strokeLinecap="round"/>
               <line x1="16" y1="4" x2="4"  y2="16" stroke="#dc2626" strokeWidth="3" strokeLinecap="round"/>
@@ -361,7 +246,7 @@ export default function TrackerFrame({ onReplayIntro }) {
           )}
         </button>
 
-        {/* ── TOP CENTER: Title badge (exactly matching spideytracker) ── */}
+        {/* ── TOP CENTER: Title badge ── */}
         <div className="absolute top-1.5 left-1/2 -translate-x-1/2 z-40 pointer-events-none">
           <div
             className="flex items-center gap-2.5 px-5 py-1.5 font-silk"
@@ -382,10 +267,10 @@ export default function TrackerFrame({ onReplayIntro }) {
           </div>
         </div>
 
-        {/* ── TOP RIGHT: White square spider icon ── */}
+        {/* ── TOP RIGHT: White square spider icon (Connect trigger) ── */}
         <button
-          onClick={() => openOverlay(activeOverlay === 'connect' ? null : 'connect')}
-          className="absolute top-2 right-2 z-40 flex items-center justify-center cursor-pointer transition-transform active:scale-90"
+          onClick={() => openTab('connect')}
+          className="absolute top-2 right-2 z-50 flex items-center justify-center cursor-pointer transition-transform active:scale-90"
           style={{
             width: 44, height: 44,
             background: 'white',
@@ -394,7 +279,7 @@ export default function TrackerFrame({ onReplayIntro }) {
             boxShadow: '0 4px 0 #000',
           }}
           aria-label="Connect"
-          title="Connect / Message Center"
+          title="Connect / Transmissions"
         >
           <svg viewBox="0 0 24 24" width="22" height="22" xmlns="http://www.w3.org/2000/svg">
             <ellipse cx="12" cy="14" rx="4" ry="5" fill="#111"/>
@@ -442,7 +327,7 @@ export default function TrackerFrame({ onReplayIntro }) {
           </button>
         </div>
 
-        {/* ── INNER VIEWPORT (MAP AREA) ── */}
+        {/* ── INNER VIEWPORT (MAP & OVERLAYS AREA) ── */}
         <div
           className="relative flex-1 min-h-0 w-full overflow-hidden"
           style={{
@@ -454,84 +339,30 @@ export default function TrackerFrame({ onReplayIntro }) {
             boxShadow: 'inset 0 4px 20px rgba(0,0,0,0.95)',
           }}
         >
-          {/* Ruler overlays */}
-          <RulerTop/>
-          <RulerLeft/>
-
-          {/* Map */}
+          {/* Map Viewport */}
           <MapViewport
             confirmedActive={confirmedActive}
             rumoredActive={rumoredActive}
             onSelectNode={(node) => setSelectedNode(node)}
             statusToast={toast}
             onTriggerToast={triggerToast}
-            onOpenActivityLog={() => openOverlay('activity')}
+            onOpenActivityLog={() => openTab('activity')}
             isIntroActive={showIntro}
           />
 
-          {/* Radar */}
-          <RadarWidget/>
-
-          {/* Toast */}
-          {toast && <Toast message={toast} id={toastKey}/>}
-
-          {/* ── INTRO SOUND SCREEN ── */}
+          {/* ── INTRO SOUND SCREEN (Matching Frame 020) ── */}
           {showIntro && <IntroScreen onStart={handleStartTracker}/>}
 
-          {/* ── NAVIGATION OVERLAY ── */}
-          <NavigationOverlay
-            isOpen={activeOverlay === 'nav'}
-            onClose={closeOverlay}
-            activeView={activeOverlay}
-            onSelectView={handleSelectView}
+          {/* ── SPIDEY MENU OVERLAY (Split Navigation: Left Menu + Right Active Content) ── */}
+          <SpideyMenuOverlay
+            isOpen={!!activeMenuTab}
+            activeTab={activeMenuTab}
+            onSelectTab={setActiveMenuTab}
+            onClose={() => setActiveMenuTab(null)}
+            onSelectNode={(node) => setSelectedNode(node)}
           />
 
-          {/* ── ACTIVITY LOG ── */}
-          <ActivityLogOverlay
-            isOpen={activeOverlay === 'activity'}
-            onClose={closeOverlay}
-            onSelectNode={(node) => { setSelectedNode(node); closeOverlay(); }}
-            onSelectTab={handleSelectView}
-          />
-
-          {/* ── PROJECTS (Web Watch style) ── */}
-          <ProjectsOverlay
-            isOpen={activeOverlay === 'projects'}
-            onClose={closeOverlay}
-            onSelectNode={(node) => { setSelectedNode(node); closeOverlay(); }}
-          />
-
-          {/* ── SKILLS ── */}
-          <SkillsArchitectureOverlay
-            isOpen={activeOverlay === 'skills'}
-            onClose={closeOverlay}
-          />
-
-          {/* ── INTERNSHIP ── */}
-          <ExperienceOverlay
-            isOpen={activeOverlay === 'internship'}
-            onClose={closeOverlay}
-          />
-
-          {/* ── CONNECT ── */}
-          <ConnectDrawer
-            isOpen={activeOverlay === 'connect'}
-            onClose={closeOverlay}
-          />
-
-          {/* ── ABOUT ME ── */}
-          <AboutMeOverlay
-            isOpen={activeOverlay === 'about'}
-            onClose={closeOverlay}
-          />
-
-          {/* ── HELP ── */}
-          <HelpOverlay
-            isOpen={activeOverlay === 'help'}
-            onClose={closeOverlay}
-          />
-
-          {/* ── PROJECT DOSSIER ── */}
+          {/* ── FULL PROJECT DOSSIER MODAL ── */}
           {selectedNode && (
             <ProjectDossierModal
               node={selectedNode}
@@ -544,7 +375,7 @@ export default function TrackerFrame({ onReplayIntro }) {
         <div
           className="absolute z-40 cursor-pointer"
           style={{ bottom: -4, left: -4 }}
-          onClick={() => openOverlay('activity')}
+          onClick={() => openTab('activity')}
           title="Activity Log"
         >
           <PixelMascot frame={mascotFrame}/>
@@ -596,7 +427,7 @@ export default function TrackerFrame({ onReplayIntro }) {
           WATCH RESUME / DOSSIER
         </a>
 
-        {/* Center branding */}
+        {/* Center branding & Footer Links */}
         <div className="flex flex-col items-center text-center flex-1 min-w-0 px-2">
           <h1
             className="text-sm sm:text-lg font-silk font-bold tracking-tight uppercase"
@@ -618,7 +449,7 @@ export default function TrackerFrame({ onReplayIntro }) {
             <span>·</span>
             <a href={`mailto:${profile.email}`} className="hover:text-white transition-colors">EMAIL</a>
             <span>·</span>
-            <button onClick={() => openOverlay('activity')} className="hover:text-white transition-colors cursor-pointer">ACTIVITY LOG</button>
+            <button onClick={() => openTab('activity')} className="hover:text-white transition-colors cursor-pointer">ACTIVITY LOG</button>
             <span>·</span>
             {onReplayIntro && (
               <>
@@ -632,7 +463,7 @@ export default function TrackerFrame({ onReplayIntro }) {
 
         {/* Right: Get Connected */}
         <button
-          onClick={() => openOverlay('connect')}
+          onClick={() => openTab('connect')}
           className="btn-arcade-yellow px-4 sm:px-6 py-2 text-[10px] sm:text-xs font-bold tracking-wider uppercase rounded-lg cursor-pointer flex-shrink-0"
           style={{ minWidth: 140 }}
         >
