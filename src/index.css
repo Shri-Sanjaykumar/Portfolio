@@ -265,6 +265,7 @@ html, body {
   flex-direction: column;
 }
 
+
 /* ============================================================
    SCROLLBAR STYLING
    ============================================================ */
@@ -272,6 +273,33 @@ html, body {
 ::-webkit-scrollbar-track { background: #0d1622; }
 ::-webkit-scrollbar-thumb { background: #1e3348; border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: #2b4a6b; }
+
+/* ============================================================
+   EXTRA UTILITIES
+   ============================================================ */
+.border-3 { border-width: 3px; }
+
+/* Arcade green button text fix */
+.btn-arcade-green { color: #0a1a0a; }
+
+/* Ensure btn-arcade-yellow cursor */
+.btn-arcade-yellow { cursor: pointer; }
+.btn-arcade-green  { cursor: pointer; }
+
+/* ============================================================
+   WEB-RING CLICK EFFECT (also referenced in TrackerFrame)
+   ============================================================ */
+@keyframes webRingPulse {
+  0%   { opacity: 0.9; transform: translate(-50%,-50%) scale(0.2); }
+  100% { opacity: 0;   transform: translate(-50%,-50%) scale(1.8); }
+}
+
+/* Spider-man themed realistic web-shoot on click */
+.web-shoot-effect {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+}
 
 /* ============================================================
    ACCESSIBILITY
@@ -285,3 +313,4 @@ html, body {
     transition-duration: 0.01ms !important;
   }
 }
+

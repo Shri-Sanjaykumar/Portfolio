@@ -2,187 +2,123 @@ import React, { useState } from 'react';
 import { activityLog, trackerNodes } from '../data/portfolioData';
 import { soundEffects } from '../utils/audio';
 
-const NAV_TABS = [
-  { id: 'activity',   label: 'ACTIVITY LOG' },
-  { id: 'projects',   label: 'PROJECTS & MISSIONS' },
-  { id: 'watch',      label: 'WEB WATCH 1.0' },
-  { id: 'skills',     label: 'SKILLS & ARCHITECTURE' },
-  { id: 'leadership', label: 'EVENTS & LEADERSHIP' },
-  { id: 'education',  label: 'EDUCATION (VIT)' },
-  { id: 'connect',    label: 'MESSAGE CENTER' },
-];
-
-const STATUS_COLORS = {
-  CONFIRMED:  { bg: '#2a4d38', text: '#79a86b', border: '#3a6b48', label: 'CONFIRMED'  },
-  EVENT:      { bg: '#4a3020', text: '#f5a742', border: '#6b4a28', label: 'EVENT'      },
-  EDUCATION:  { bg: '#1e3050', text: '#67c6ea', border: '#2a4870', label: 'EDUCATION'  },
-  RUMORED:    { bg: '#4a2020', text: '#e05656', border: '#6b2828', label: 'RUMORED'    },
-  EXPERIENCE: { bg: '#2a2a50', text: '#a07ef5', border: '#3a3a70', label: 'EXPERIENCE' },
-  LEADERSHIP: { bg: '#4a3a00', text: '#e8c838', border: '#6b5500', label: 'LEADERSHIP' },
+// Exactly spideytracker.net's "ACTIVITY LOG" panel — simple full-screen table
+const BADGE_CFG = {
+  CONFIRMED:  { bg: 'rgba(30,90,40,0.5)', text: '#7ecf7e', border: '1px solid rgba(60,160,60,0.4)' },
+  EVENT:      { bg: 'rgba(60,40,10,0.5)', text: '#f5a742', border: '1px solid rgba(200,120,0,0.4)' },
+  EDUCATION:  { bg: 'rgba(10,30,80,0.5)', text: '#67b8e8', border: '1px solid rgba(20,80,180,0.4)' },
+  EXPERIENCE: { bg: 'rgba(40,20,80,0.5)', text: '#b07ef5', border: '1px solid rgba(120,60,200,0.4)' },
+  LEADERSHIP: { bg: 'rgba(80,60,0,0.5)',  text: '#e8c838', border: '1px solid rgba(200,150,0,0.4)' },
+  RUMORED:    { bg: 'rgba(80,20,20,0.5)', text: '#e05656', border: '1px solid rgba(200,40,40,0.4)' },
 };
 
-function StatusBadge({ status }) {
-  const cfg = STATUS_COLORS[status] || STATUS_COLORS.CONFIRMED;
+function Badge({ type }) {
+  const cfg = BADGE_CFG[type] || BADGE_CFG.CONFIRMED;
   return (
-    <span
-      className="px-1.5 py-0.5 rounded text-[8px] sm:text-[9px] font-silk font-bold uppercase tracking-wider flex-shrink-0"
-      style={{ background: cfg.bg, color: cfg.text, border: `1px solid ${cfg.border}` }}
+    <span className="font-silk text-[8px] sm:text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded flex-shrink-0"
+      style={{ background: cfg.bg, color: cfg.text, border: cfg.border, whiteSpace: 'nowrap' }}
     >
-      {cfg.label}
+      {type}
     </span>
   );
 }
 
+// Green spider marker icon (matching spideytracker's left icon per row)
+function SpiderMarker({ type }) {
+  const color = type === 'RUMORED' ? '#cc3333' : type === 'EVENT' ? '#e8a838' : '#79a86b';
+  const bg    = type === 'RUMORED' ? '#3a1010' : type === 'EVENT' ? '#3a2a08' : '#1a3318';
+  return (
+    <div className="flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center"
+      style={{ background: bg, border: `2px solid ${color}` }}
+    >
+      <svg viewBox="0 0 14 14" width="10" height="10">
+        <ellipse cx="7" cy="8" rx="2.5" ry="3" fill={color}/>
+        <circle  cx="7" cy="5" r="2"         fill={color}/>
+        <line x1="4.5" y1="7" x2="1" y2="5.5" stroke={color} strokeWidth="1" strokeLinecap="round"/>
+        <line x1="4.5" y1="8.5" x2="0.5" y2="8.5" stroke={color} strokeWidth="1" strokeLinecap="round"/>
+        <line x1="9.5" y1="7" x2="13" y2="5.5" stroke={color} strokeWidth="1" strokeLinecap="round"/>
+        <line x1="9.5" y1="8.5" x2="13.5" y2="8.5" stroke={color} strokeWidth="1" strokeLinecap="round"/>
+      </svg>
+    </div>
+  );
+}
+
 export default function ActivityLogOverlay({ isOpen, onClose, onSelectNode, onSelectTab }) {
-  const [activeTab, setActiveTab] = useState('activity');
-  const [hoveredRow, setHoveredRow] = useState(null);
+  const [hovered, setHovered] = useState(null);
 
   if (!isOpen) return null;
 
-  const handleTabClick = (tabId) => {
-    soundEffects.click();
-    if (tabId === 'activity') {
-      setActiveTab('activity');
-    } else {
-      if (onSelectTab) onSelectTab(tabId);
+  const handleRow = (entry) => {
+    try { soundEffects.select?.(); } catch {}
+    if (entry.nodeId) {
+      const node = trackerNodes.find(n => n.id === entry.nodeId);
+      if (node && onSelectNode) onSelectNode(node);
     }
-  };
-
-  const handleRowClick = (nodeId) => {
-    soundEffects.select();
-    const node = trackerNodes.find((n) => n.id === nodeId);
-    if (node && onSelectNode) onSelectNode(node);
   };
 
   return (
     <div
-      className="absolute inset-0 z-40 flex"
-      style={{ background: 'rgba(10,18,28,0.85)', backdropFilter: 'blur(4px)' }}
-      onClick={onClose}
+      className="absolute inset-0 z-40 flex flex-col"
+      style={{ background: 'rgba(10,17,28,0.98)' }}
     >
-      <div
-        className="w-full max-h-full flex overflow-hidden animate-dossier-reveal"
-        style={{
-          background: '#121f2d',
-          border: '3px solid #000',
-          borderRadius: '12px',
-          margin: '16px',
-          boxShadow: '0 25px 60px rgba(0,0,0,0.95), inset 2px 2px 0 rgba(255,255,255,0.08)',
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Left Sidebar — matching ezgif-frame-040 */}
-        <div
-          className="w-44 sm:w-56 flex-shrink-0 flex flex-col"
-          style={{ background: '#0e1925', borderRight: '2px solid #000' }}
-        >
-          <div className="px-4 py-3" style={{ borderBottom: '1px solid #162433' }}>
-            <div className="text-[9px] font-silk text-cyan-400 tracking-widest uppercase">
-              RADAR INDEX
-            </div>
-          </div>
-          <div className="flex-1 p-2 space-y-0.5 overflow-y-auto">
-            {NAV_TABS.map((tab) => {
-              const isCurrent = tab.id === activeTab || (tab.id !== 'activity' && false);
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => handleTabClick(tab.id)}
-                  className="w-full text-left text-[10px] sm:text-xs py-2 px-2.5 rounded font-silk cursor-pointer transition-all"
-                  style={{
-                    background: isCurrent ? 'rgba(245,167,66,0.12)' : 'transparent',
-                    color: isCurrent ? '#f5a742' : '#c5d8e8',
-                    borderLeft: isCurrent ? '3px solid #f5a742' : '3px solid transparent',
-                    fontWeight: isCurrent ? 'bold' : 'normal',
-                  }}
-                >
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
-          <div className="p-3 text-[8px] font-mono" style={{ borderTop: '1px solid #162433' }}>
-            <div className="text-gray-400 font-bold">SHRI SANJAYKUMAR V</div>
-            <div className="text-cyan-400 mt-0.5">9.12 CGPA @ VIT</div>
-          </div>
-        </div>
+      {/* Spidey decorative — right side */}
+      <img src="/spidey/spiderman-sense.png" alt="" className="absolute pointer-events-none"
+        style={{ width:200,height:260,right:0,top:0,objectFit:'contain',opacity:0.06,
+          filter:'drop-shadow(0 0 20px rgba(220,38,38,0.3))' }}
+      />
 
-        {/* Main Content Area */}
-        <div className="flex-1 flex flex-col min-w-0">
-          {/* Header */}
+      {/* Header — matches spideytracker "ACTIVITY LOG ▌  ✕ CLOSE" exactly */}
+      <div className="flex items-center justify-between px-5 sm:px-8 py-4 flex-shrink-0"
+        style={{ borderBottom: '1.5px solid rgba(30,61,90,0.6)' }}
+      >
+        <div className="flex items-center gap-3">
+          <span className="font-silk text-sm sm:text-base font-bold text-white tracking-widest uppercase">
+            ACTIVITY LOG
+          </span>
+          {/* Blinking cursor block — exactly like spideytracker */}
+          <span className="inline-block w-2.5 h-4 animate-cursor align-middle" style={{ background: '#e2f0fb' }}/>
+        </div>
+        <button onClick={() => { try { soundEffects.close?.(); } catch {} onClose(); }}
+          className="font-silk text-xs sm:text-sm cursor-pointer hover:text-white transition-colors flex items-center gap-1.5"
+          style={{ color: '#9ab8cc' }}
+        >
+          ✕ CLOSE
+        </button>
+      </div>
+
+      {/* Table */}
+      <div className="flex-1 overflow-y-auto">
+        {activityLog.map((entry, i) => (
           <div
-            className="flex items-center justify-between px-4 sm:px-6 py-3"
-            style={{ borderBottom: '2px solid #162433' }}
+            key={entry.id || i}
+            onClick={() => handleRow(entry)}
+            onMouseEnter={() => setHovered(i)}
+            onMouseLeave={() => setHovered(null)}
+            className="flex items-center gap-3 sm:gap-5 px-5 sm:px-8 py-3 cursor-pointer transition-all"
+            style={{
+              borderBottom: '1px solid rgba(30,61,90,0.4)',
+              background: hovered === i ? 'rgba(255,255,255,0.04)' : 'transparent',
+            }}
           >
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_6px_#67e8f9]" />
-              <h2 className="text-xs sm:text-sm font-silk font-bold text-white tracking-widest uppercase">
-                ACTIVITY LOG
-              </h2>
-              <span
-                className="text-[9px] font-silk px-2 py-0.5 rounded"
-                style={{ background: '#1a2d42', color: '#67e8f9', border: '1px solid #1e3d5a' }}
-              >
-                {activityLog.length} ENTRIES
+            {/* Spider marker icon */}
+            <SpiderMarker type={entry.badgeType || 'CONFIRMED'}/>
+
+            {/* Badge */}
+            <Badge type={entry.badgeType || 'CONFIRMED'}/>
+
+            {/* Title */}
+            <div className="flex-1 min-w-0">
+              <span className="font-silk text-[10px] sm:text-xs text-white tracking-wider uppercase font-bold truncate block">
+                {entry.title}
               </span>
             </div>
-            <button
-              onClick={() => { soundEffects.close(); onClose(); }}
-              className="flex items-center gap-1.5 text-[10px] font-silk cursor-pointer hover:text-white transition-colors px-3 py-1.5 rounded-lg"
-              style={{ color: '#8cb0cc', background: '#162433', border: '1px solid #2b4157' }}
-            >
-              ✕ CLOSE
-            </button>
+
+            {/* Date */}
+            <div className="font-silk text-[9px] sm:text-[10px] flex-shrink-0" style={{ color: '#6b8fa8' }}>
+              {entry.date}
+            </div>
           </div>
-
-          {/* Table */}
-          <div className="flex-1 overflow-y-auto">
-            {activityLog.map((entry, i) => (
-              <div
-                key={entry.id || i}
-                className="flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-3 cursor-pointer transition-all border-l-2"
-                style={{
-                  borderBottom: '1px solid #162433',
-                  background: hoveredRow === i ? 'rgba(255,255,255,0.04)' : 'transparent',
-                  borderLeftColor: hoveredRow === i ? '#f5a742' : 'transparent',
-                }}
-                onMouseEnter={() => setHoveredRow(i)}
-                onMouseLeave={() => setHoveredRow(null)}
-                onClick={() => { if (entry.nodeId) handleRowClick(entry.nodeId); }}
-                role={entry.nodeId ? 'button' : undefined}
-              >
-                {/* Status dot */}
-                <div
-                  className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full flex-shrink-0"
-                  style={{
-                    background: STATUS_COLORS[entry.badgeType]?.text || '#79a86b',
-                    boxShadow: `0 0 5px ${STATUS_COLORS[entry.badgeType]?.text || '#79a86b'}`,
-                  }}
-                />
-
-                {/* Status badge */}
-                <StatusBadge status={entry.badgeType || 'CONFIRMED'} />
-
-                {/* Title */}
-                <div className="flex-1 min-w-0">
-                  <div className="text-[10px] sm:text-xs font-silk text-white truncate tracking-wide">
-                    {entry.title}
-                  </div>
-                  {entry.summary && (
-                    <div className="text-[8px] sm:text-[9px] font-mono text-gray-400 truncate mt-0.5">
-                      {entry.summary}
-                    </div>
-                  )}
-                </div>
-
-                {/* Date */}
-                <div className="text-[9px] sm:text-[10px] font-silk text-gray-400 flex-shrink-0 text-right">
-                  {entry.date}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   );
